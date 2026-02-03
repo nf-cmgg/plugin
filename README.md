@@ -29,5 +29,5 @@ Follow these steps to publish the plugin to the Nextflow Plugin Registry:
 
 
 > [!NOTE]
-> The Nextflow Plugin registry is currently available as preview technology. Contact info@nextflow.io to learn how to get access to it.
+> The Nextflow Plugin registry is currently available as preview technology.
 > 
