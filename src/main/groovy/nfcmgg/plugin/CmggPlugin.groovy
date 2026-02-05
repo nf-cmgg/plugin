@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package nfcmgg.plugin
 
 import groovy.transform.CompileStatic
@@ -29,4 +28,5 @@ class CmggPlugin extends BasePlugin {
     CmggPlugin(PluginWrapper wrapper) {
         super(wrapper)
     }
+
 }

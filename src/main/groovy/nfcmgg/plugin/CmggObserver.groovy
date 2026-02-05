@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package nfcmgg.plugin
 
 import groovy.transform.CompileStatic
@@ -31,11 +30,12 @@ class CmggObserver implements TraceObserver {
 
     @Override
     void onFlowCreate(Session session) {
-        println "Pipeline is starting! 🚀"
+        println 'Pipeline is starting! 🚀'
     }
 
     @Override
     void onFlowComplete() {
-        println "Pipeline complete! 👋"
+        println 'Pipeline complete! 👋'
     }
+
 }
