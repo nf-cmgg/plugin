@@ -18,7 +18,7 @@ package nfcmgg.plugin
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import nextflow.Session
-import nextflow.trace.TraceObserver
+import nextflow.trace.TraceObserverV2
 
 import nfcmgg.plugin.smaple.SmapleAuth
 
@@ -28,7 +28,7 @@ import nfcmgg.plugin.smaple.SmapleAuth
  */
 @Slf4j
 @CompileStatic
-class CmggObserver implements TraceObserver {
+class CmggObserver implements TraceObserverV2 {
 
     @Override
     void onFlowCreate(Session session) {
@@ -38,11 +38,6 @@ class CmggObserver implements TraceObserver {
             System.getenv('SMAPLE_USERNAME'),
             System.getenv('SMAPLE_PASSWORD')
         ).login()
-    }
-
-    @Override
-    void onFlowComplete() {
-        println 'Pipeline complete! 👋'
     }
 
 }
