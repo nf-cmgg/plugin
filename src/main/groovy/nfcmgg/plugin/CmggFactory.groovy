@@ -15,11 +15,14 @@
  */
 package nfcmgg.plugin
 
+import java.nio.file.Path
+
 import groovy.util.logging.Slf4j
 import groovy.transform.CompileStatic
 import nextflow.Session
 import nextflow.trace.TraceObserverV2
 import nextflow.trace.TraceObserverFactoryV2
+import nextflow.Nextflow
 
 import nfcmgg.plugin.samplesheets.PreprocessingObserver
 

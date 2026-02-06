@@ -63,6 +63,9 @@ class SamplesheetCreator {
     }
 
     void dump(List<Object> entries, Path samplesheet) {
+        if (!samplesheet.parent.exists()) {
+            samplesheet.parent.mkdirs()
+        }
         samplesheet.text = yaml.dump(entries)
     }
 

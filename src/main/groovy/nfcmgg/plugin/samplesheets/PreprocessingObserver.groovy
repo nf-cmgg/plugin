@@ -37,18 +37,27 @@ import nextflow.Nextflow
 @CompileStatic
 class PreprocessingObserver implements TraceObserverV2 {
 
-    Map<String, NfCmggPreprocessingOutputEntry> entries = new ConcurrentHashMap<>()
-    SamplesheetCreator creator = new SamplesheetCreator()
+    final private SamplesheetCreator creator = new SamplesheetCreator()
+
+    private Map<String, NfCmggPreprocessingOutputEntry> entries = new ConcurrentHashMap<>()
+    private Path outdir
 
     @Override
     void onFlowCreate(Session session) {
-        log.info('Automatic samplesheet generation detected')
+        String outdirString = session?.params?.get('outdir', null)
+        outdir = outdirString ? Nextflow.file(outdirString) as Path : null
+        if (outdir == null) {
+            outdir = session?.workDir
+            log.warn("No outdir specified, creating samplesheets in work directory at $outdir")
+        }
+        outdir = outdir.resolve("samplesheets/${new Date().format('yyyyMMdd_HHmmss')}")
+        log.info("Samplesheets will be generated in '$outdir'")
     }
 
     @Override
     void onFilePublish(FilePublishEvent event) {
         String targetName = event.target.name
-        String targetPath = event.target.toUri()
+        String targetPath = event.target.toUriString()
         switch (targetName) {
             case ~/^.*\.cram$/:
                 entries[safeGetSample(targetName)].cram = targetPath
@@ -68,8 +77,16 @@ class PreprocessingObserver implements TraceObserverV2 {
     @Override
     void onFlowComplete() {
         entries = entries.sort()
-        Path samplesheet = Nextflow.file('nf-cmgg-preprocessing-samplesheet.yaml') as Path
-        creator.dump(entries.values()*.subKeys(['id', 'cram', 'crai']) as List<Object>, samplesheet)
+
+        creator.dump(
+            entries.values()*.subKeys(['id', 'cram', 'crai']) as List<Object>,
+            outdir.resolve('sampletracking_samplesheet.yaml')
+        )
+
+        creator.dump(
+            entries.values()*.subKeys(['id', ['cram', 'bam'], ['crai', 'bai'], 'strandedness']) as List<Object>,
+            outdir.resolve('rnafusion_samplesheet.yaml')
+        )
     }
 
     private String safeGetSample(String basePath) {
@@ -87,17 +104,37 @@ class NfCmggPreprocessingOutputEntry {
     String id
     String cram
     String crai
+    String bam
+    String bai
     String fastq1
     String fastq2
+    String strandedness
 
-    NfCmggPreprocessingOutputEntry(String sample) {
+    NfCmggPreprocessingOutputEntry(String sample, Boolean autoFill = true) {
         this.id = sample
+        if (autoFill) {
+            this.strandedness = "unknown"
+        }
     }
 
-    NfCmggPreprocessingOutputEntry subKeys(List<String> keys) {
-        NfCmggPreprocessingOutputEntry newEntry = new NfCmggPreprocessingOutputEntry(this.id)
-        keys.each { String key ->
-            newEntry."$key" = this."$key"
+    /*
+    * Create a new entry containing only the specified keys.
+    *
+    * @param keys: a list of keys to keep in the new entry.
+    *   If an element is a string, the key with the same name will be kept.
+    *   If an element is a list, it should contain exactly 2 strings: 
+    *       the first is the original key, the second is the new key
+    */
+    NfCmggPreprocessingOutputEntry subKeys(List<Object> keys) {
+        NfCmggPreprocessingOutputEntry newEntry = new NfCmggPreprocessingOutputEntry(this.id, false)
+        keys.each { Object key ->
+            if (key in String) {
+                newEntry."$key" = this."$key"
+            } else if (key in List<String> && key.size() == 2) {
+                String oldKey = key[0]
+                String newKey = key[1]
+                newEntry."$newKey" = this."$oldKey"
+            }
         }
         return newEntry
     }
