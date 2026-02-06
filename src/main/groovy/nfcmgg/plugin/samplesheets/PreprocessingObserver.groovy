@@ -66,10 +66,10 @@ class PreprocessingObserver implements TraceObserverV2 {
                 entries[safeGetSample(targetName)].crai = targetPath
                 break
             case ~/^.*R1_00.\.fastq\.gz$/:
-                entries[safeGetSample(targetName)].fastq1 = targetPath
+                entries[safeGetSample(targetName)].fastq_1 = targetPath
                 break
             case ~/^.*R2_00.\.fastq\.gz$/:
-                entries[safeGetSample(targetName)].fastq2 = targetPath
+                entries[safeGetSample(targetName)].fastq_2 = targetPath
                 break
         }
     }
@@ -77,15 +77,15 @@ class PreprocessingObserver implements TraceObserverV2 {
     @Override
     void onFlowComplete() {
         entries = entries.sort()
-
+        // nf-cmgg/sampletracking samplesheet
         creator.dump(
             entries.values()*.subKeys(['id', 'cram', 'crai']) as List<Object>,
-            outdir.resolve('sampletracking_samplesheet.yaml')
+            outdir.resolve('nfcmgg_sampletracking_samplesheet.yaml')
         )
-
+        // nf-core/rnafusion samplesheet
         creator.dump(
-            entries.values()*.subKeys(['id', ['cram', 'bam'], ['crai', 'bai'], 'strandedness']) as List<Object>,
-            outdir.resolve('rnafusion_samplesheet.yaml')
+            entries.values()*.subKeys(['id', 'fastq_1', 'fastq_2', 'strandedness']) as List<Object>,
+            outdir.resolve('nfcore_rnafusion_samplesheet.yaml')
         )
     }
 
@@ -106,14 +106,16 @@ class NfCmggPreprocessingOutputEntry {
     String crai
     String bam
     String bai
-    String fastq1
-    String fastq2
+    /* groovylint-disable-next-line PropertyName */
+    String fastq_1
+    /* groovylint-disable-next-line PropertyName */
+    String fastq_2
     String strandedness
 
     NfCmggPreprocessingOutputEntry(String sample, Boolean autoFill = true) {
         this.id = sample
         if (autoFill) {
-            this.strandedness = "unknown"
+            this.strandedness = 'unknown'
         }
     }
 
@@ -122,7 +124,7 @@ class NfCmggPreprocessingOutputEntry {
     *
     * @param keys: a list of keys to keep in the new entry.
     *   If an element is a string, the key with the same name will be kept.
-    *   If an element is a list, it should contain exactly 2 strings: 
+    *   If an element is a list, it should contain exactly 2 strings:
     *       the first is the original key, the second is the new key
     */
     NfCmggPreprocessingOutputEntry subKeys(List<Object> keys) {
