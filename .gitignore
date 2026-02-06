@@ -9,3 +9,5 @@ work
 
 .env
 results
+*.yaml
+*.yml

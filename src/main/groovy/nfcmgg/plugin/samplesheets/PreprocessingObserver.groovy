@@ -19,13 +19,16 @@ import static nfcmgg.plugin.utils.ParseHelper.sampleFromPath
 
 import groovy.util.logging.Slf4j
 import groovy.transform.CompileStatic
+import groovy.transform.CompileDynamic
 import groovy.transform.Canonical
 
 import java.util.concurrent.ConcurrentHashMap
+import java.nio.file.Path
 
 import nextflow.Session
 import nextflow.trace.event.FilePublishEvent
 import nextflow.trace.TraceObserverV2
+import nextflow.Nextflow
 
 /**
  * Create samplesheets for pipelines after nf-cmgg/preprocessing
@@ -35,6 +38,7 @@ import nextflow.trace.TraceObserverV2
 class PreprocessingObserver implements TraceObserverV2 {
 
     Map<String, NfCmggPreprocessingOutputEntry> entries = new ConcurrentHashMap<>()
+    SamplesheetCreator creator = new SamplesheetCreator()
 
     @Override
     void onFlowCreate(Session session) {
@@ -63,24 +67,39 @@ class PreprocessingObserver implements TraceObserverV2 {
 
     @Override
     void onFlowComplete() {
-        println entries
+        entries = entries.sort()
+        Path samplesheet = Nextflow.file('nf-cmgg-preprocessing-samplesheet.yaml') as Path
+        creator.dump(entries.values()*.subKeys(['id', 'cram', 'crai']) as List<Object>, samplesheet)
     }
 
     private String safeGetSample(String basePath) {
         String sample = sampleFromPath(basePath)
-        entries.putIfAbsent(sample, new NfCmggPreprocessingOutputEntry())
+        entries.putIfAbsent(sample, new NfCmggPreprocessingOutputEntry(sample))
         return sample
     }
 
 }
 
 @Canonical
-@CompileStatic
+@CompileDynamic
 class NfCmggPreprocessingOutputEntry {
 
+    String id
     String cram
     String crai
     String fastq1
     String fastq2
+
+    NfCmggPreprocessingOutputEntry(String sample) {
+        this.id = sample
+    }
+
+    NfCmggPreprocessingOutputEntry subKeys(List<String> keys) {
+        NfCmggPreprocessingOutputEntry newEntry = new NfCmggPreprocessingOutputEntry(this.id)
+        keys.each { String key ->
+            newEntry."$key" = this."$key"
+        }
+        return newEntry
+    }
 
 }
