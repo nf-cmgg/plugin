@@ -20,7 +20,6 @@ import static nfcmgg.plugin.utils.ParseHelper.sampleFromPath
 import groovy.util.logging.Slf4j
 import groovy.transform.CompileStatic
 import groovy.transform.Canonical
-import java.nio.file.Path
 
 import nextflow.Session
 import nextflow.trace.event.FilePublishEvent

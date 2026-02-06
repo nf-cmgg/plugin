@@ -30,14 +30,14 @@ import nfcmgg.plugin.smaple.SmapleAuth
 @CompileStatic
 class CmggObserver implements TraceObserverV2 {
 
-    @Override
-    void onFlowCreate(Session session) {
-        // TODO implement proper auth fetching via config
-        new SmapleAuth(
-            System.getenv('SMAPLE_URL'),
-            System.getenv('SMAPLE_USERNAME'),
-            System.getenv('SMAPLE_PASSWORD')
-        ).login()
-    }
+    // @Override
+    // void onFlowCreate(Session session) {
+        // // TODO implement proper auth fetching via config
+        // new SmapleAuth(
+        //     System.getenv('SMAPLE_URL'),
+        //     System.getenv('SMAPLE_USERNAME'),
+        //     System.getenv('SMAPLE_PASSWORD')
+        // ).login()
+    // }
 
 }
