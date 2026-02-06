@@ -21,6 +21,8 @@ import groovy.util.logging.Slf4j
 import groovy.transform.CompileStatic
 import groovy.transform.Canonical
 
+import java.util.concurrent.ConcurrentHashMap
+
 import nextflow.Session
 import nextflow.trace.event.FilePublishEvent
 import nextflow.trace.TraceObserverV2
@@ -32,7 +34,7 @@ import nextflow.trace.TraceObserverV2
 @CompileStatic
 class PreprocessingObserver implements TraceObserverV2 {
 
-    Map<String, NfCmggPreprocessingOutputEntry> entries = Collections.synchronizedMap([:])
+    Map<String, NfCmggPreprocessingOutputEntry> entries = new ConcurrentHashMap<>()
 
     @Override
     void onFlowCreate(Session session) {
@@ -66,9 +68,7 @@ class PreprocessingObserver implements TraceObserverV2 {
 
     private String safeGetSample(String basePath) {
         String sample = sampleFromPath(basePath)
-        if (!entries.containsKey(sample)) {
-            entries[sample] = new NfCmggPreprocessingOutputEntry()
-        }
+        entries.putIfAbsent(sample, new NfCmggPreprocessingOutputEntry())
         return sample
     }
 
