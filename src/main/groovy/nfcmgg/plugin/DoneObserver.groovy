@@ -25,7 +25,6 @@ import groovy.util.logging.Slf4j
 import nextflow.Session
 import nextflow.trace.TraceObserverV2
 
-import nfcmgg.plugin.smaple.SmapleAuth
 
 /**
  * Implements an observer that allows implementing custom
