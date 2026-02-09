@@ -22,6 +22,7 @@ import nextflow.trace.TraceObserverV2
 import nextflow.trace.TraceObserverFactoryV2
 
 import nfcmgg.plugin.samplesheets.PreprocessingObserver
+import nfcmgg.plugin.config.CmggConfig
 
 /**
  * Implements a factory object required to create
@@ -33,21 +34,37 @@ class CmggFactory implements TraceObserverFactoryV2 {
 
     @Override
     Collection<TraceObserverV2> create(Session session) {
-        Collection<TraceObserverV2> observers = [new CmggObserver()]
-        String pipelineName = session?.manifest?.name
-        if (!pipelineName) {
-            log.info('Cannot determine pipeline name from session manifest, skipping automatic samplesheet generation')
-            return observers
+        CmggConfig config = new CmggConfig(session.config?.navigate('cmgg') as Map ?: [:])
+        Collection<TraceObserverV2> observers = []
+
+        if (config.done.enabled) {
+            observers << new DoneObserver(config.done.location)
         }
 
-        log.info("Detected pipeline name: '${pipelineName}', checking for automatic samplesheet generation")
+        if (config.samplesheets.enabled) {
+            // TODO implement proper auth fetching via config
+            // new SmapleAuth(
+            //     System.getenv('SMAPLE_URL'),
+            //     System.getenv('SMAPLE_USERNAME'),
+            //     System.getenv('SMAPLE_PASSWORD')
+            // ).login()
+            String pipelineName = session?.manifest?.name
+            if (!pipelineName) {
+                log.info(
+                    'Cannot determine pipeline name from session manifest, skipping automatic samplesheet generation'
+                )
+                return observers
+            }
 
-        switch (pipelineName) {
-            case 'nf-cmgg/preprocessing':
-                observers << new PreprocessingObserver()
-                break
-            default:
-                log.info('No automatic samplesheet generation possible for the current pipeline')
+            log.info("Detected pipeline name: '${pipelineName}', checking for automatic samplesheet generation")
+
+            switch (pipelineName) {
+                case 'nf-cmgg/preprocessing':
+                    observers << new PreprocessingObserver(config.samplesheets.location)
+                    break
+                default:
+                    log.info('No automatic samplesheet generation possible for the current pipeline')
+            }
         }
         return observers
     }

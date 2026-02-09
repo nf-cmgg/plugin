@@ -15,6 +15,7 @@
  */
 package nfcmgg.plugin
 
+import static nfcmgg.plugin.utils.FilesHelper.checkParent
 import static nfcmgg.plugin.utils.SessionFetcher.getOutdir
 
 import java.nio.file.Path
@@ -32,27 +33,27 @@ import nfcmgg.plugin.smaple.SmapleAuth
  */
 @Slf4j
 @CompileStatic
-class CmggObserver implements TraceObserverV2 {
+class DoneObserver implements TraceObserverV2 {
 
     private Session session
-    private Path outdir
+    private Path location
+
+    DoneObserver(Path location) {
+        this.location = location
+    }
 
     @Override
     void onFlowCreate(Session session) {
-        this.outdir = getOutdir(session)
+        this.location = this.location ?: getOutdir(session)
         this.session = session
-        // TODO implement proper auth fetching via config
-        // new SmapleAuth(
-        //     System.getenv('SMAPLE_URL'),
-        //     System.getenv('SMAPLE_USERNAME'),
-        //     System.getenv('SMAPLE_PASSWORD')
-        // ).login()
     }
 
     @Override
     void onFlowComplete() {
         if (session.success) {
-            outdir.resolve('DONE').text = ''
+            Path doneFile = location.resolve('DONE')
+            checkParent(doneFile)
+            doneFile.text = ''
         }
     }
 

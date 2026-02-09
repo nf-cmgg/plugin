@@ -38,14 +38,18 @@ class PreprocessingObserver implements TraceObserverV2 {
     final private SamplesheetCreator creator = new SamplesheetCreator()
 
     private Map<String, OutputEntry> entries = new ConcurrentHashMap<>()
-    private Path outdir
+    private Path location
     private Session session
+
+    PreprocessingObserver(Path location) {
+        this.location = location
+    }
 
     @Override
     void onFlowCreate(Session session) {
-        this.outdir = getSamplesheetOutdir(session)
+        this.location = this.location ?: getSamplesheetOutdir(session)
         this.session = session
-        log.info("Samplesheets will be generated in '$outdir'")
+        log.info("Samplesheets will be generated in '$location'")
     }
 
     @Override
@@ -75,12 +79,12 @@ class PreprocessingObserver implements TraceObserverV2 {
             // nf-cmgg/sampletracking samplesheet
             creator.dump(
                 entries.values()*.subKeys(['id', 'cram', 'crai']),
-                outdir.resolve('nfcmgg_sampletracking_samplesheet.yaml')
+                location.resolve('nfcmgg_sampletracking_samplesheet.yaml')
             )
             // nf-core/rnafusion samplesheet
             creator.dump(
                 entries.values()*.subKeys(['id', 'fastq_1', 'fastq_2', 'strandedness']),
-                outdir.resolve('nfcore_rnafusion_samplesheet.yaml')
+                location.resolve('nfcore_rnafusion_samplesheet.yaml')
             )
         }
     }

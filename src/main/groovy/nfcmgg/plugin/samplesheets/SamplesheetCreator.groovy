@@ -15,6 +15,8 @@
  */
 package nfcmgg.plugin.samplesheets
 
+import static nfcmgg.plugin.utils.FilesHelper.checkParent
+
 import groovy.util.logging.Slf4j
 import groovy.transform.CompileStatic
 
@@ -63,9 +65,7 @@ class SamplesheetCreator {
     }
 
     void dump(List<OutputEntry> entries, Path samplesheet) {
-        if (!samplesheet.parent.exists()) {
-            samplesheet.parent.mkdirs()
-        }
+        checkParent(samplesheet)
         samplesheet.text = yaml.dump(entries*.values)
     }
 
