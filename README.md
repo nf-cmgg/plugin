@@ -1,5 +1,39 @@
 # nf-cmgg plugin
 
+## Setup
+
+To use the plugin add the following to your `nextflow.config`:
+
+```groovy
+plugins {
+   id 'nf-cmgg@0.1.0'
+}
+```
+
+After this you should configure the plugin. See the [Configuration](#configuration) section for details.
+
+## Configuration
+
+The plugin can be configured by the `cmgg` configuration scope.
+
+### Done
+
+The `done` configuration scope allows you to configure the creation of a `DONE` file.
+
+This scope contains the following options:
+
+- `cmgg.done.enabled` (default: `false`): Whether to create a `DONE` file after successful pipeline execution.
+- `cmgg.done.location` (default: `null`): The location where the `DONE` file will be created. If not set, the `DONE` file will be created in the pipeline's output directory. If the output directory is not set, the `DONE` file will be created in the current working directory.
+
+### Samplesheets
+
+The `samplesheets` configuration scope allows you to configure the generation of samplesheets.
+
+This scope contains the following options:
+
+- `cmgg.samplesheets.enabled` (default: `false`): Whether to generate samplesheets before pipeline execution.
+- `cmgg.samplesheets.location` (default: `null`): The location where the samplesheets will be generated. If not set, the samplesheets will be generated in the pipeline's output directory. If the output directory is not set, the samplesheets will be generated in the current working directory.
+
 ## Building
 
 To build the plugin:
