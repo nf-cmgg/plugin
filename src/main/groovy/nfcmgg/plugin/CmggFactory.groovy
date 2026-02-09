@@ -13,24 +13,43 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package nfcmgg.plugin
 
+import groovy.util.logging.Slf4j
 import groovy.transform.CompileStatic
 import nextflow.Session
-import nextflow.trace.TraceObserver
-import nextflow.trace.TraceObserverFactory
+import nextflow.trace.TraceObserverV2
+import nextflow.trace.TraceObserverFactoryV2
+
+import nfcmgg.plugin.samplesheets.PreprocessingObserver
 
 /**
  * Implements a factory object required to create
  * the {@link CmggObserver} instance.
  */
+@Slf4j
 @CompileStatic
-class CmggFactory implements TraceObserverFactory {
+class CmggFactory implements TraceObserverFactoryV2 {
 
     @Override
-    Collection<TraceObserver> create(Session session) {
-        return List.<TraceObserver>of(new CmggObserver())
+    Collection<TraceObserverV2> create(Session session) {
+        Collection<TraceObserverV2> observers = [new CmggObserver()]
+        String pipelineName = session?.manifest?.name
+        if (!pipelineName) {
+            log.info('Cannot determine pipeline name from session manifest, skipping automatic samplesheet generation')
+            return observers
+        }
+
+        log.info("Detected pipeline name: '${pipelineName}', checking for automatic samplesheet generation")
+
+        switch (pipelineName) {
+            case 'nf-cmgg/preprocessing':
+                observers << new PreprocessingObserver()
+                break
+            default:
+                log.info('No automatic samplesheet generation possible for the current pipeline')
+        }
+        return observers
     }
 
 }

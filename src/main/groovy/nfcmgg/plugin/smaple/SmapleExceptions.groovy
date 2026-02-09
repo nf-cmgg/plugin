@@ -13,31 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nfcmgg.plugin
+package nfcmgg.plugin.smaple
 
 import groovy.transform.CompileStatic
-import groovy.util.logging.Slf4j
-import nextflow.Session
-import nextflow.trace.TraceObserverV2
-
-import nfcmgg.plugin.smaple.SmapleAuth
+import nextflow.exception.AbortOperationException
 
 /**
- * Implements an observer that allows implementing custom
- * logic on nextflow execution events.
+ * Exceptions related to Smaple API interactions
  */
-@Slf4j
+/* groovylint-disable-next-line ClassNameSameAsFilename */
 @CompileStatic
-class CmggObserver implements TraceObserverV2 {
+class SmapleConnectionException extends AbortOperationException {
 
-    // @Override
-    // void onFlowCreate(Session session) {
-        // // TODO implement proper auth fetching via config
-        // new SmapleAuth(
-        //     System.getenv('SMAPLE_URL'),
-        //     System.getenv('SMAPLE_USERNAME'),
-        //     System.getenv('SMAPLE_PASSWORD')
-        // ).login()
-    // }
+    SmapleConnectionException(String message) {
+        super(message)
+    }
 
 }

@@ -1,19 +1,22 @@
+/* groovylint-disable JUnitPublicNonTestMethod, MethodName */
 package nfcmgg.plugin
+
+import groovy.transform.CompileDynamic
 
 import nextflow.Session
 import spock.lang.Specification
 
 /**
  * Implements a basic factory test
- *
  */
+@CompileDynamic
 class CmggObserverTest extends Specification {
 
-    def 'should create the observer instance' () {
+    void 'should create the observer instance'() {
         given:
-        def factory = new CmggFactory()
+        CmggFactory factory = new CmggFactory()
         when:
-        def result = factory.create(Mock(Session))
+        Object result = factory.create(Mock(Session))
         then:
         result.size() == 1
         result.first() instanceof CmggObserver

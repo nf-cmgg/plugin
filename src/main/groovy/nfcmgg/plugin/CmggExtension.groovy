@@ -13,12 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package nfcmgg.plugin
 
 import groovy.transform.CompileStatic
 import nextflow.Session
-import nextflow.plugin.extension.Function
 import nextflow.plugin.extension.PluginExtensionPoint
 
 /**
@@ -30,16 +28,6 @@ class CmggExtension extends PluginExtensionPoint {
 
     @Override
     protected void init(Session session) {
-    }
-
-    /**
-     * Say hello to the given target.
-     *
-     * @param target
-     */
-    @Function
-    void sayHello(String target) {
-        println "Hello, ${target}!"
     }
 
 }

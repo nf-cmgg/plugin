@@ -19,3 +19,7 @@ install:
 # Publish the plugin
 release:
 	./gradlew releasePlugin
+
+# Lint the groovy code
+lint:
+	npm-groovy-lint "src/**/*.groovy" --fix && npm-groovy-lint "src/**/*.groovy" --format
