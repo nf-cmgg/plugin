@@ -15,6 +15,10 @@
  */
 package nfcmgg.plugin
 
+import static nfcmgg.plugin.utils.SessionFetcher.getOutdir
+
+import java.nio.file.Path
+
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import nextflow.Session
@@ -30,14 +34,26 @@ import nfcmgg.plugin.smaple.SmapleAuth
 @CompileStatic
 class CmggObserver implements TraceObserverV2 {
 
-    // @Override
-    // void onFlowCreate(Session session) {
-        // // TODO implement proper auth fetching via config
+    private Session session
+    private Path outdir
+
+    @Override
+    void onFlowCreate(Session session) {
+        this.outdir = getOutdir(session)
+        this.session = session
+        // TODO implement proper auth fetching via config
         // new SmapleAuth(
         //     System.getenv('SMAPLE_URL'),
         //     System.getenv('SMAPLE_USERNAME'),
         //     System.getenv('SMAPLE_PASSWORD')
         // ).login()
-    // }
+    }
+
+    @Override
+    void onFlowComplete() {
+        if (session.success) {
+            outdir.resolve('DONE').text = ''
+        }
+    }
 
 }

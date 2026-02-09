@@ -16,11 +16,10 @@
 package nfcmgg.plugin.samplesheets
 
 import static nfcmgg.plugin.utils.ParseHelper.sampleFromPath
+import static nfcmgg.plugin.utils.SessionFetcher.getSamplesheetOutdir
 
 import groovy.util.logging.Slf4j
 import groovy.transform.CompileStatic
-import groovy.transform.CompileDynamic
-import groovy.transform.Canonical
 
 import java.util.concurrent.ConcurrentHashMap
 import java.nio.file.Path
@@ -28,7 +27,6 @@ import java.nio.file.Path
 import nextflow.Session
 import nextflow.trace.event.FilePublishEvent
 import nextflow.trace.TraceObserverV2
-import nextflow.Nextflow
 
 /**
  * Create samplesheets for pipelines after nf-cmgg/preprocessing
@@ -44,13 +42,7 @@ class PreprocessingObserver implements TraceObserverV2 {
 
     @Override
     void onFlowCreate(Session session) {
-        String outdirString = session?.params?.get('outdir', null)
-        outdir = outdirString ? Nextflow.file(outdirString) as Path : null
-        if (outdir == null) {
-            outdir = session?.workDir
-            log.warn("No outdir specified, creating samplesheets in work directory at $outdir")
-        }
-        outdir = outdir.resolve("samplesheets/${new Date().format('yyyyMMdd_HHmmss')}")
+        this.outdir = getSamplesheetOutdir(session)
         log.info("Samplesheets will be generated in '$outdir'")
     }
 
