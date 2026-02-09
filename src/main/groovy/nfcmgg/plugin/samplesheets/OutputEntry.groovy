@@ -17,12 +17,14 @@ package nfcmgg.plugin.samplesheets
 
 import groovy.transform.CompileDynamic
 import groovy.transform.Canonical
+import groovy.util.logging.Slf4j
 
 /**
  * A class representing an output entry from a pipeline.
  * It contains a map of key-value pairs, where the keys are the column names in the samplesheet
  * and the values are the corresponding values for that entry.
  */
+@Slf4j
 @Canonical
 @CompileDynamic
 class OutputEntry {
@@ -44,8 +46,9 @@ class OutputEntry {
     OutputEntry subKeys(List<Object> keys) {
         Map<String, String> newValues = [:]
         keys.each { Object key ->
-            if (!values.containsKey(key)) {
-                log.warn("Key '$key' not found in entry")
+            String keyToCheck = key in String ? key as String : (key as List<String>)[0]
+            if (!values.containsKey(keyToCheck)) {
+                log.warn("Key '$keyToCheck' not found in entry")
                 return
             }
             if (key in String) {
