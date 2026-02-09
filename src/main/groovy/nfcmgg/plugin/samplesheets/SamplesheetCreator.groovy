@@ -58,15 +58,15 @@ class SamplesheetCreator {
             }
 
         }
-        representer.addClassTag(NfCmggPreprocessingOutputEntry, Tag.MAP)
+        representer.addClassTag(OutputEntry, Tag.MAP)
         yaml = new Yaml(representer, options)
     }
 
-    void dump(List<Object> entries, Path samplesheet) {
+    void dump(List<OutputEntry> entries, Path samplesheet) {
         if (!samplesheet.parent.exists()) {
             samplesheet.parent.mkdirs()
         }
-        samplesheet.text = yaml.dump(entries)
+        samplesheet.text = yaml.dump(entries*.values)
     }
 
 }
