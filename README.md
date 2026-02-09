@@ -63,4 +63,3 @@ Follow these steps to publish the plugin to the Nextflow Plugin Registry:
 
 > [!NOTE]
 > The Nextflow Plugin registry is currently available as preview technology.
-
