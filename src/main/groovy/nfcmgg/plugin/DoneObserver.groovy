@@ -51,7 +51,8 @@ class DoneObserver implements TraceObserverV2 {
         if (session.success) {
             Path doneFile = location.resolve('DONE')
             checkParent(doneFile)
-            doneFile.text = ''
+            /* groovylint-disable-next-line LineLength */
+            doneFile.text = "Pipeline completed on ${new Date().format('dd/MM/yyyy')} at ${new Date().format('HH:mm:ss')}"
         }
     }
 
