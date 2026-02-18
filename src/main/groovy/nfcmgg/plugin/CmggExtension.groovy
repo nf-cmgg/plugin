@@ -31,6 +31,7 @@ class CmggExtension extends PluginExtensionPoint {
     /*
      * Parse first line of a FASTQ file, return the flowcell id and lane number.
      */
+    @Function
     String flowcellLaneFromFastq(Path path) {
         return nfcmgg.plugin.utils.FastqUtils.flowcellLaneFromFastq(path)
     }
@@ -38,6 +39,7 @@ class CmggExtension extends PluginExtensionPoint {
     /*
      * Get first line of a FASTQ file
      */
+    @Function
     String readFirstLineOfFastq(Path path) {
         return nfcmgg.plugin.utils.FastqUtils.readFirstLineOfFastq(path)
     }
@@ -45,6 +47,7 @@ class CmggExtension extends PluginExtensionPoint {
     /*
      * Add readgroup to meta and remove lane
      */
+    @Function
     List addReadgroupToMeta(Map meta, List<Path> files, Map params) {
         return nfcmgg.plugin.utils.FastqUtils.addReadgroupToMeta(meta, files, params)
     }
