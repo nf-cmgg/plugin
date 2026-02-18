@@ -19,6 +19,7 @@ import groovy.transform.CompileStatic
 import nextflow.Session
 import nextflow.plugin.extension.PluginExtensionPoint
 import java.nio.file.Path
+import nextflow.plugin.extension.Function
 
 /**
  * Implements a custom function which can be imported by
