@@ -15,41 +15,22 @@
  */
 package nfcmgg.plugin.samplesheets
 
-import static nfcmgg.plugin.utils.ParseHelper.sampleFromPath
-import static nfcmgg.plugin.utils.SessionFetcher.getSamplesheetOutdir
-
 import groovy.util.logging.Slf4j
 import groovy.transform.CompileStatic
 
-import java.util.concurrent.ConcurrentHashMap
 import java.nio.file.Path
 
-import nextflow.Session
 import nextflow.trace.event.FilePublishEvent
-import nextflow.trace.TraceObserverV2
 
 /**
  * Create samplesheets for pipelines after nf-cmgg/preprocessing
  */
 @Slf4j
 @CompileStatic
-class PreprocessingObserver implements TraceObserverV2 {
-
-    final private SamplesheetCreator creator = new SamplesheetCreator()
-
-    private Map<String, OutputEntry> entries = new ConcurrentHashMap<>()
-    private Path location
-    private Session session
+class PreprocessingObserver extends PipelineObserver {
 
     PreprocessingObserver(Path location) {
-        this.location = location
-    }
-
-    @Override
-    void onFlowCreate(Session session) {
-        this.location = this.location ?: getSamplesheetOutdir(session)
-        this.session = session
-        log.info("Samplesheets will be generated in '$location'")
+        super(location)
     }
 
     @Override
@@ -87,12 +68,6 @@ class PreprocessingObserver implements TraceObserverV2 {
                 location.resolve('nfcore_rnafusion_samplesheet.yaml')
             )
         }
-    }
-
-    private String safeGetSample(String basePath) {
-        String sample = sampleFromPath(basePath)
-        entries.putIfAbsent(sample, new OutputEntry(['id': sample, 'strandedness': 'unknown']))
-        return sample
     }
 
 }
