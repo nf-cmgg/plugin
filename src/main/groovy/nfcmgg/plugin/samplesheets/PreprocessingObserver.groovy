@@ -31,6 +31,7 @@ class PreprocessingObserver extends PipelineObserver {
 
     PreprocessingObserver(Path location) {
         super(location)
+        super.sampleKey = 'samplename'
     }
 
     @Override
@@ -67,17 +68,29 @@ class PreprocessingObserver extends PipelineObserver {
                 entries.values()*.subKeys(['id', 'fastq_1', 'fastq_2', 'strandedness']),
                 location.resolve('nfcore_rnafusion_samplesheet.yaml')
             )
+            // nf-cmgg/vivar samplesheet
+            creator.dump(
+                // TODO add logic for binsize and project ID
+                entries.values()*.subKeys(
+                    ['id', 'organism', 'tag', 'normdup', 'nipt', ['cram', 'reads'], ['crai', 'reads_index']]
+                ),
+                location.resolve('nfcmgg_vivar_samplesheet.yaml')
+            )
         }
     }
 
     Map getDefaultValuesForSample(String sample) {
-        Map<String,Object> sampleData = inputData.find { entry -> entry.samplename == sample } ?: [:]
+        Map<String,Object> sampleData = inputData.find { entry -> entry.get('samplename', '') == sample } ?: [:]
+        String sampleType = sampleData.get('sample_type', 'DNA')
+        String tag = sampleData.get('tag', '')
         return [
             'strandedness': 'unknown',
-            'tag': sampleData.get('tag', null),
+            'tag': tag,
             'organism': sampleData.get('organism', null),
             'genome': sampleData.get('genome', null),
-            'sample_type': sampleData.get('sample_type', 'DNA')
+            'sample_type': sampleType,
+            'normdup': tag.toLowerCase() == 'copgt-m',
+            'nipt': tag.toLowerCase() == 'cfdnaseq'
         ]
     }
 

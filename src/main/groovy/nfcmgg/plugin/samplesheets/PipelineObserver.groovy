@@ -41,23 +41,38 @@ class PipelineObserver implements TraceObserverV2 {
     Path location
     List<Map<String, Object>> inputData
     Session session
+    String sampleKey
+    Set<String> samples
 
     PipelineObserver(Path location) {
         this.location = location
+        this.sampleKey = 'id'
     }
 
     @Override
     void onFlowCreate(Session session) {
         this.location = this.location ?: getSamplesheetOutdir(session)
         this.inputData = getInputSamplesheetList(session)
-        println inputData
-        println inputData.size()
+        this.samples = inputData*.get(sampleKey).findAll { sample -> sample != null}.toSet() as Set<String>
         this.session = session
         log.info("Samplesheets will be generated in '$location'")
     }
 
     String safeGetSample(String basePath) {
-        String sample = sampleFromPath(basePath)
+        List<String> possibleSamples = samples.findAll { sample -> basePath.startsWith(sample) }.toList() as List<String>
+        String sample
+        switch (possibleSamples.size()) {
+            case 1:
+                sample = possibleSamples[0]
+                break
+            case 0:
+                sample = sampleFromPath(basePath)
+                log.warn("Could not find sample for path '$basePath' in input samplesheet, using '$sample' as sample name")
+                break
+            default:
+                sample = possibleSamples.sort { a, b -> b.size() <=> a.size() }[0]
+                log.warn("Multiple possible samples found for path '$basePath': $possibleSamples, using '$sample' as sample name, because it is the longest match")
+        }
         entries.putIfAbsent(sample, new OutputEntry(['id': sample] + getDefaultValuesForSample(sample)))
         return sample
     }
