@@ -70,4 +70,15 @@ class PreprocessingObserver extends PipelineObserver {
         }
     }
 
+    Map getDefaultValuesForSample(String sample) {
+        Map<String,Object> sampleData = inputData.find { entry -> entry.samplename == sample } ?: [:]
+        return [
+            'strandedness': 'unknown',
+            'tag': sampleData.get('tag', null),
+            'organism': sampleData.get('organism', null),
+            'genome': sampleData.get('genome', null),
+            'sample_type': sampleData.get('sample_type', 'DNA')
+        ]
+    }
+
 }

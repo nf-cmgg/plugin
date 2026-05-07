@@ -19,7 +19,6 @@ import java.nio.file.Path
 
 import groovy.util.logging.Slf4j
 import groovy.transform.CompileDynamic
-import org.yaml.snakeyaml.Yaml
 
 import nextflow.Session
 import nextflow.Nextflow
@@ -53,29 +52,17 @@ class SessionFetcher {
             return []
         }
         Path samplesheetPath = Nextflow.file(samplesheetLocation) as Path
-        if (!samplesheetPath.exists()) {
-            return []
+        List<Map<String, Object>> samplesheetList = FilesHelper.readSamplesheet(samplesheetPath)
+        // Add samples from flowcells to samplesheet input (only applicable for preprocessing)
+        List<Map<String, Object>> flowcellSamples = []
+        samplesheetList?.each { entry ->
+            String sampleInfo = entry.get('sample_info', null)
+            if (!sampleInfo) {
+                return
+            }
+            flowcellSamples.addAll(FilesHelper.readSamplesheet(Nextflow.file(sampleInfo) as Path))
         }
-        String extension = samplesheetPath.extension
-        if (extension == 'yaml' || extension == 'yml') {
-            // Parse YAML file
-            return new Yaml().load(samplesheetPath.text) as List<Map<String, Object>>
-        }
-        switch (extension) {
-            case 'csv':
-                // Parse CSV file
-                return samplesheetPath.splitCsv(
-                    header:true, sep:',', strip:true, quote:'\"') as List<Map<String, Object>>
-            case 'tsv':
-                // Parse TSV file
-                return samplesheetPath.splitCsv(
-                    header:true, sep:'\t', strip:true, quote:'\"') as List<Map<String, Object>>
-            case 'json':
-                // Parse JSON file
-                return new groovy.json.JsonSlurper().parse(samplesheetPath.toFile()) as List<Map<String, Object>>
-        }
-        log.warn("Unsupported samplesheet format: $extension")
-        return []
+        return samplesheetList + flowcellSamples
     }
 
 }

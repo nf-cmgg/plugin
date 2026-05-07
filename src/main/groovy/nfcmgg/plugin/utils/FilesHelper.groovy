@@ -16,6 +16,7 @@
 package nfcmgg.plugin.utils
 
 import java.nio.file.Path
+import org.yaml.snakeyaml.Yaml
 
 import groovy.util.logging.Slf4j
 import groovy.transform.CompileDynamic
@@ -31,6 +32,32 @@ class FilesHelper {
         if (!path.parent.exists()) {
             path.parent.mkdirs()
         }
+    }
+
+    static List<Map<String, Object>> readSamplesheet(Path samplesheet) {
+        if (!samplesheet.exists()) {
+            return []
+        }
+        String extension = samplesheet.extension
+        if (extension == 'yaml' || extension == 'yml') {
+            // Parse YAML file
+            return new Yaml().load(samplesheet.text) as List<Map<String, Object>>
+        }
+        switch (extension) {
+            case 'csv':
+                // Parse CSV file
+                return samplesheet.splitCsv(
+                    header:true, sep:',', strip:true, quote:'\"') as List<Map<String, Object>>
+            case 'tsv':
+                // Parse TSV file
+                return samplesheet.splitCsv(
+                    header:true, sep:'\t', strip:true, quote:'\"') as List<Map<String, Object>>
+            case 'json':
+                // Parse JSON file
+                return new groovy.json.JsonSlurper().parseText(samplesheet.text) as List<Map<String, Object>>
+        }
+        log.warn("Unsupported samplesheet format: $extension")
+        return []
     }
 
 }

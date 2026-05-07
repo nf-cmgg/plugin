@@ -50,14 +50,26 @@ class PipelineObserver implements TraceObserverV2 {
     void onFlowCreate(Session session) {
         this.location = this.location ?: getSamplesheetOutdir(session)
         this.inputData = getInputSamplesheetList(session)
+        println inputData
+        println inputData.size()
         this.session = session
         log.info("Samplesheets will be generated in '$location'")
     }
 
     String safeGetSample(String basePath) {
         String sample = sampleFromPath(basePath)
-        entries.putIfAbsent(sample, new OutputEntry(['id': sample, 'strandedness': 'unknown']))
+        entries.putIfAbsent(sample, new OutputEntry(['id': sample] + getDefaultValuesForSample(sample)))
         return sample
+    }
+
+    /**
+     * Override this method to provide default values for samples when they are first encountered
+     * @param sample the sample name for which default values should be provided
+     * @return a map of key-value pairs to be added to the sample entry when it is first created
+     */
+    /* groovylint-disable-next-line UnusedMethodParameter */
+    Map getDefaultValuesForSample(String sample) {
+        return [:]
     }
 
 }
