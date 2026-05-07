@@ -18,7 +18,8 @@ package nfcmgg.plugin.utils
 import java.nio.file.Path
 
 import groovy.util.logging.Slf4j
-import groovy.transform.CompileStatic
+import groovy.transform.CompileDynamic
+import org.yaml.snakeyaml.Yaml
 
 import nextflow.Session
 import nextflow.Nextflow
@@ -27,7 +28,7 @@ import nextflow.Nextflow
  * Common utilities for fetching session information
  */
 @Slf4j
-@CompileStatic
+@CompileDynamic
 class SessionFetcher {
 
     final private static String CREATIONDATE = new Date().format('yyyyMMdd_HHmmss')
@@ -44,6 +45,37 @@ class SessionFetcher {
 
     static Path getSamplesheetOutdir(Session session) {
         return getOutdir(session).resolve("samplesheets/${CREATIONDATE}")
+    }
+
+    static List<Map<String, Object>> getInputSamplesheetList(Session session) {
+        String samplesheetLocation = session?.params?.get('input', null)
+        if (!samplesheetLocation) {
+            return []
+        }
+        Path samplesheetPath = Nextflow.file(samplesheetLocation) as Path
+        if (!samplesheetPath.exists()) {
+            return []
+        }
+        String extension = samplesheetPath.extension
+        if (extension == 'yaml' || extension == 'yml') {
+            // Parse YAML file
+            return new Yaml().load(samplesheetPath.text) as List<Map<String, Object>>
+        }
+        switch (extension) {
+            case 'csv':
+                // Parse CSV file
+                return samplesheetPath.splitCsv(
+                    header:true, sep:',', strip:true, quote:'\"') as List<Map<String, Object>>
+            case 'tsv':
+                // Parse TSV file
+                return samplesheetPath.splitCsv(
+                    header:true, sep:'\t', strip:true, quote:'\"') as List<Map<String, Object>>
+            case 'json':
+                // Parse JSON file
+                return new groovy.json.JsonSlurper().parse(samplesheetPath.toFile()) as List<Map<String, Object>>
+        }
+        log.warn("Unsupported samplesheet format: $extension")
+        return []
     }
 
 }

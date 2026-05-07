@@ -17,6 +17,7 @@ package nfcmgg.plugin.samplesheets
 
 import static nfcmgg.plugin.utils.ParseHelper.sampleFromPath
 import static nfcmgg.plugin.utils.SessionFetcher.getSamplesheetOutdir
+import static nfcmgg.plugin.utils.SessionFetcher.getInputSamplesheetList
 
 import groovy.util.logging.Slf4j
 import groovy.transform.CompileStatic
@@ -28,7 +29,7 @@ import nextflow.Session
 import nextflow.trace.TraceObserverV2
 
 /**
- * Create samplesheets for pipelines after nf-cmgg/preprocessing
+ * A base observer class to be extended per pipeline
  */
 @Slf4j
 @CompileStatic
@@ -38,6 +39,7 @@ class PipelineObserver implements TraceObserverV2 {
 
     Map<String, OutputEntry> entries = new ConcurrentHashMap<>()
     Path location
+    List<Map<String, Object>> inputData
     Session session
 
     PipelineObserver(Path location) {
@@ -47,6 +49,7 @@ class PipelineObserver implements TraceObserverV2 {
     @Override
     void onFlowCreate(Session session) {
         this.location = this.location ?: getSamplesheetOutdir(session)
+        this.inputData = getInputSamplesheetList(session)
         this.session = session
         log.info("Samplesheets will be generated in '$location'")
     }
