@@ -51,6 +51,12 @@ class PreprocessingObserver extends PipelineObserver {
             case ~/^.*R2_00.\.fastq\.gz$/:
                 entries[safeGetSample(targetName)].add('fastq_2', targetPath)
                 break
+            case ~/.per_base.bed.gz$/:
+                entries[safeGetSample(targetName)].add('per_base_bed', targetPath)
+                break
+            case ~/.per_base.bed.gz\.tbi$/:
+                entries[safeGetSample(targetName)].add('per_base_bed_index', targetPath)
+                break
         }
     }
 
@@ -60,20 +66,32 @@ class PreprocessingObserver extends PipelineObserver {
             entries = entries.sort()
             // nf-cmgg/sampletracking samplesheet
             creator.dump(
-                entries.values()*.subKeys(['id', 'cram', 'crai']),
+                entries.values()*.subKeys([['id','sample'], 'cram', 'crai']),
                 location.resolve('nfcmgg_sampletracking_samplesheet.yaml')
             )
             // nf-core/rnafusion samplesheet
             creator.dump(
-                entries.values()*.subKeys(['id', 'fastq_1', 'fastq_2', 'strandedness']),
+                entries.values()*.subKeys([['id','sample'], 'fastq_1', 'fastq_2', 'strandedness']),
                 location.resolve('nfcore_rnafusion_samplesheet.yaml')
             )
             // nf-cmgg/vivar samplesheet
             creator.dump(
                 entries.values()*.subKeys(
-                    ['id', 'organism', 'tag', 'normdup', 'nipt', 'binsize', 'project_id', ['cram', 'reads'], ['crai', 'reads_index']]
+                    [['id','sample'], 'organism', 'tag', 'normdup', 'nipt', 'binsize', 'project_id', ['cram', 'reads'], ['crai', 'reads_index']]
                 ),
                 location.resolve('nfcmgg_vivar_samplesheet.yaml')
+            )
+            // nf-cmgg/exomecnv samplesheet
+            creator.dump(
+                // TODO add logic for the batch
+                entries.values()*.subKeys([['id','sample'], 'family', 'cram', 'crai', ['per_base_bed', 'bed'], ['per_base_bed_index', 'bed_index']]),
+                location.resolve('nfcmgg_exomecnv_samplesheet.yaml')
+            )
+            // nf-cmgg/smallvariants samplesheet
+            creator.dump(
+                // TODO add PED logic for smallvariants
+                entries.values()*.subKeys([['id','sample'], 'cram', 'crai']),
+                location.resolve('nfcmgg_smallvariants_samplesheet.yaml')
             )
         }
     }
@@ -90,8 +108,10 @@ class PreprocessingObserver extends PipelineObserver {
             'sample_type': sampleType,
             'normdup': tag.toLowerCase() == 'copgt-m',
             'nipt': tag.toLowerCase() == 'cfdnaseq',
+            // TODO check all following fields once they've been added to the sample info file
             'binsize': sampleData.get('binsize', null),
-            'project_id': sampleData.get('project_id', null)
+            'project_id': sampleData.get('project_id', null),
+            'family': sampleData.get('family', null)
         ]
     }
 
