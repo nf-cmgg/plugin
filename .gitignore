@@ -12,3 +12,7 @@ results
 *.yaml
 *.yml
 DONE
+
+# pixi environments
+.pixi/*
+!.pixi/config.toml
