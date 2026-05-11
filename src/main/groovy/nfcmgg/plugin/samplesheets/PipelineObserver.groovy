@@ -38,12 +38,26 @@ class PipelineObserver implements TraceObserverV2 {
     final SamplesheetCreator creator = new SamplesheetCreator()
 
     Map<String, OutputEntry> entries = new ConcurrentHashMap<>()
+
+    // Location where the samplesheets should be generated
     Path location
+
+    // The input samplesheet converted to a List of maps
     List<Map<String, Object>> inputData
+
+    // The nextflow session
     Session session
+
+    // The key in the samplesheet that contains the sample name
     String sampleKey
+
+    // A set of all sample names
     Set<String> samples
 
+    /**
+     * Constructor for the PipelineObserver
+     * @param location the location where the samplesheets should be generated, if null it will be determined from the session
+     */
     PipelineObserver(Path location) {
         this.location = location
         this.sampleKey = 'id'
@@ -58,7 +72,13 @@ class PipelineObserver implements TraceObserverV2 {
         log.info("Samplesheets will be generated in '$location'")
     }
 
-    String safeGetSample(String basePath) {
+    /**
+     * Safely get the sample name for a given base path. This method will try to find the best matching sample name from the input samplesheet based on the base path. If no match is found, it will use the sample name extracted from the base path. If multiple matches are found, it will use the longest match and log a warning.
+     * If the sample is not found in the pipeline entries, the sample will be safely added to the entries using a set of default values fetched from the samplesheet. These default values can be adjusted by overriding the `getDefaultValuesForSample` method.
+     * @param basePath the base path for which to get the sample name
+     * @return the sample name for the given base path
+     */
+    protected String safeGetSample(String basePath) {
         List<String> possibleSamples = samples.findAll { sample -> basePath.startsWith(sample) }.toList() as List<String>
         String sample
         switch (possibleSamples.size()) {

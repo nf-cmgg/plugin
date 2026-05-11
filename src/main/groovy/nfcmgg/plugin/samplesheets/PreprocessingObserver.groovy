@@ -70,9 +70,8 @@ class PreprocessingObserver extends PipelineObserver {
             )
             // nf-cmgg/vivar samplesheet
             creator.dump(
-                // TODO add logic for binsize and project ID
                 entries.values()*.subKeys(
-                    ['id', 'organism', 'tag', 'normdup', 'nipt', ['cram', 'reads'], ['crai', 'reads_index']]
+                    ['id', 'organism', 'tag', 'normdup', 'nipt', 'binsize', 'project_id', ['cram', 'reads'], ['crai', 'reads_index']]
                 ),
                 location.resolve('nfcmgg_vivar_samplesheet.yaml')
             )
@@ -90,7 +89,9 @@ class PreprocessingObserver extends PipelineObserver {
             'genome': sampleData.get('genome', null),
             'sample_type': sampleType,
             'normdup': tag.toLowerCase() == 'copgt-m',
-            'nipt': tag.toLowerCase() == 'cfdnaseq'
+            'nipt': tag.toLowerCase() == 'cfdnaseq',
+            'binsize': sampleData.get('binsize', null),
+            'project_id': sampleData.get('project_id', null)
         ]
     }
 
