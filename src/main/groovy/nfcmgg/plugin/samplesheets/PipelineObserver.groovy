@@ -49,18 +49,18 @@ class PipelineObserver implements TraceObserverV2 {
     Session session
 
     // The key in the samplesheet that contains the sample name
-    String sampleKey
+    String sampleKey = 'sample'
 
     // A set of all sample names
     Set<String> samples
 
     /**
      * Constructor for the PipelineObserver
-     * @param location the location where the samplesheets should be generated, if null it will be determined from the session
+     * @param location the location where the samplesheets should be generated,
+     * if null it will be determined from the session
      */
     PipelineObserver(Path location) {
         this.location = location
-        this.sampleKey = 'id'
     }
 
     @Override
@@ -73,35 +73,6 @@ class PipelineObserver implements TraceObserverV2 {
     }
 
     /**
-     * Safely get the sample name for a given base path. This method will try to find the best matching sample name from the input samplesheet based on the base path. If no match is found, it will use the sample name extracted from the base path. If multiple matches are found, it will use the longest match and log a warning.
-     * If the sample is not found in the pipeline entries, the sample will be safely added to the entries using a set of default values fetched from the samplesheet. These default values can be adjusted by overriding the `getDefaultValuesForSample` method.
-     * @param basePath the base path for which to get the sample name
-     * @return the sample name for the given base path
-     */
-    protected String safeGetSample(String basePath) {
-        // Make sure SNP tracking data will be added to the correct sample
-        if (basePath.startsWith('snp_')) {
-            basePath = basePath - 'snp_'
-        }
-        List<String> possibleSamples = samples.findAll { sample -> basePath.startsWith(sample) }.toList() as List<String>
-        String sample
-        switch (possibleSamples.size()) {
-            case 1:
-                sample = possibleSamples[0]
-                break
-            case 0:
-                sample = sampleFromPath(basePath)
-                log.warn("Could not find sample for path '$basePath' in input samplesheet, using '$sample' as sample name")
-                break
-            default:
-                sample = possibleSamples.sort { a, b -> b.size() <=> a.size() }[0]
-                log.warn("Multiple possible samples found for path '$basePath': $possibleSamples, using '$sample' as sample name, because it is the longest match")
-        }
-        entries.putIfAbsent(sample, new OutputEntry(['id': sample] + getDefaultValuesForSample(sample)))
-        return sample
-    }
-
-    /**
      * Override this method to provide default values for samples when they are first encountered
      * @param sample the sample name for which default values should be provided
      * @return a map of key-value pairs to be added to the sample entry when it is first created
@@ -109,6 +80,47 @@ class PipelineObserver implements TraceObserverV2 {
     /* groovylint-disable-next-line UnusedMethodParameter */
     Map getDefaultValuesForSample(String sample) {
         return [:]
+    }
+
+    /**
+     * Safely get the sample name for a given base path. 
+     * This method will try to find the best matching sample name from the input samplesheet based on the base path.
+     * If no match is found, it will use the sample name extracted from the base path.
+     * If multiple matches are found, it will use the longest match and log a warning.
+     *
+     * If the sample is not found in the pipeline entries,
+     * the sample will be safely added to the entries using a set of default values fetched from the samplesheet.
+     * These default values can be adjusted by overriding the `getDefaultValuesForSample` method.
+     * @param basePath the base path for which to get the sample name
+     * @return the sample name for the given base path
+     */
+    protected String safeGetSample(String basePath) {
+        // Make sure SNP tracking data will be added to the correct sample
+        if (basePath.startsWith('snp_')) {
+            basePath = basePath.replaceFirst('snp_', '')
+        }
+        List<String> possibleSamples = samples
+            .findAll { sample -> basePath.startsWith(sample) }.toList() as List<String>
+        String sample
+        switch (possibleSamples.size()) {
+            case 1:
+                sample = possibleSamples[0]
+                break
+            case 0:
+                sample = sampleFromPath(basePath)
+                log.warn(
+                    "Could not find sample for path '$basePath' in input samplesheet, using '$sample' as sample name"
+                )
+                break
+            default:
+                sample = possibleSamples.sort { a, b -> b.size() <=> a.size() }[0]
+                log.warn(
+                    /* groovylint-disable-next-line LineLength */
+                    "Multiple possible samples found for path '$basePath': $possibleSamples, using '$sample' as sample name, because it is the longest match"
+                )
+        }
+        entries.putIfAbsent(sample, new OutputEntry(['id': sample] + getDefaultValuesForSample(sample)))
+        return sample
     }
 
 }

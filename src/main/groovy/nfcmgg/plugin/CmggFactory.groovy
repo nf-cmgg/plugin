@@ -22,6 +22,7 @@ import nextflow.trace.TraceObserverV2
 import nextflow.trace.TraceObserverFactoryV2
 
 import nfcmgg.plugin.samplesheets.PreprocessingObserver
+import nfcmgg.plugin.samplesheets.RnafusionObserver
 import nfcmgg.plugin.config.CmggConfig
 
 /**
@@ -42,12 +43,6 @@ class CmggFactory implements TraceObserverFactoryV2 {
         }
 
         if (config.samplesheets.enabled) {
-            // TODO implement proper auth fetching via config
-            // new SmapleAuth(
-            //     System.getenv('SMAPLE_URL'),
-            //     System.getenv('SMAPLE_USERNAME'),
-            //     System.getenv('SMAPLE_PASSWORD')
-            // ).login()
             String pipelineName = session?.manifest?.name
             if (!pipelineName) {
                 log.info(
@@ -61,6 +56,9 @@ class CmggFactory implements TraceObserverFactoryV2 {
             switch (pipelineName) {
                 case 'nf-cmgg/preprocessing':
                     observers << new PreprocessingObserver(config.samplesheets.location)
+                    break
+                case 'nf-core/rnafusion':
+                    observers << new RnafusionObserver(config.samplesheets.location)
                     break
                 default:
                     log.info('No automatic samplesheet generation possible for the current pipeline')
