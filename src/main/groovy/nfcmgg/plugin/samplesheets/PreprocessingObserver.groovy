@@ -44,7 +44,7 @@ class PreprocessingObserver extends PipelineObserver {
                 break
             case ~/^snp_.*\.cram\.crai$/:
                 entries[safeGetSample(targetName)].add('snp_crai', targetPath)
-                break            
+                break
             case ~/^.*\.cram$/:
                 entries[safeGetSample(targetName)].add('cram', targetPath)
                 break
@@ -66,37 +66,123 @@ class PreprocessingObserver extends PipelineObserver {
         }
     }
 
+    /* groovylint-disable-next-line MethodSize */
     @Override
     void onFlowComplete() {
         if (session.success) {
+            entries = entries.findAll { entry ->
+                // Only retain diagnostic samples for the samplesheets
+                entry.value.get('purpose').toLowerCase() == 'diagnostic'
+            }
             entries = entries.sort()
+
+            //
             // nf-cmgg/sampletracking samplesheet
+            //
             creator.dump(
-                entries.values()*.subKeys([['id','sample'], ['library', 'pool'], ['cram', 'sample_bam'], ['crai', 'sample_bam_index'], ['snp_cram', 'snp_bam'], ['snp_crai', 'snp_bam_index'], 'sex']),
+                entries
+                    .findAll { entry ->
+                        // Only create samplesheet for WES and WGS runs of DNA samples
+                        entry.value.get('type').toLowerCase() == 'dna' &&
+                        entry.value.get('tag').toLowerCase() in ['wes', 'wgs']
+                    }
+                    .values()
+                    *.subKeys([
+                        ['id', 'sample'],
+                        ['library', 'pool'],
+                        ['cram', 'sample_bam'],
+                        ['crai', 'sample_bam_index'],
+                        ['snp_cram', 'snp_bam'],
+                        ['snp_crai', 'snp_bam_index'],
+                        'sex'
+                    ]),
                 location.resolve('nfcmgg_sampletracking_samplesheet.yaml')
             )
+
+            //
             // nf-core/rnafusion samplesheet
+            //
             creator.dump(
-                entries.values()*.subKeys([['id','sample'], 'fastq_1', 'fastq_2', 'strandedness']),
+                entries
+                    .findAll { entry ->
+                        // Only create samplesheet for RNAseqMDG runs of RNA samples
+                        entry.value.get('type').toLowerCase() == 'rna' &&
+                        entry.value.get('tag').toLowerCase() == 'rnaseqmdg'
+                    }
+                    .values()
+                    *.subKeys([
+                        ['id', 'sample'],
+                        'fastq_1',
+                        'fastq_2',
+                        'strandedness'
+                    ]),
                 location.resolve('nfcore_rnafusion_samplesheet.yaml')
             )
+
+            //
             // nf-cmgg/vivar samplesheet
+            //
             creator.dump(
-                entries.values()*.subKeys(
-                    ['id', 'organism', 'tag', 'binsize', ['vivar_project', 'project'], 'sex', 'normdup', 'nipt', ['cram', 'reads'], ['crai', 'reads_index']]
-                ),
+                entries
+                    .findAll { entry ->
+                        // Only create samplesheet for DNA samples
+                        entry.value.get('type').toLowerCase() == 'dna'
+                    }
+                    .values()
+                    *.subKeys([
+                        'id',
+                        'organism',
+                        'tag',
+                        'binsize',
+                        ['vivar_project', 'project'],
+                        'sex',
+                        'normdup',
+                        'nipt',
+                        ['cram', 'reads'],
+                        ['crai', 'reads_index']
+                    ]),
                 location.resolve('nfcmgg_vivar_samplesheet.yaml')
             )
+
+            //
             // nf-cmgg/exomecnv samplesheet
+            //
             creator.dump(
-                // TODO add logic for the batch
-                entries.values()*.subKeys([['id','sample'], ['exomecnv_batch', 'batch'], 'family', 'cram', 'crai', ['per_base_bed', 'bed'], ['per_base_bed_index', 'bed_index']]),
+                entries
+                    .findAll { entry ->
+                        // Only create samplesheet for WES runs of DNA samples
+                        entry.value.get('type').toLowerCase() == 'dna' &&
+                        entry.value.get('tag').toLowerCase() in ['wes']
+                    }
+                    .values()
+                    *.subKeys([
+                        ['id', 'sample'],
+                        ['exomecnv_batch', 'batch'],
+                        'family',
+                        'cram',
+                        'crai',
+                        ['per_base_bed', 'bed'],
+                        ['per_base_bed_index', 'bed_index']
+                    ]),
                 location.resolve('nfcmgg_exomecnv_samplesheet.yaml')
             )
+
+            //
             // nf-cmgg/smallvariants samplesheet
+            //
             creator.dump(
-                // TODO add ROI in case of WES
-                entries.values()*.subKeys([['id','sample'], 'cram', 'crai']),
+                entries
+                    .findAll { entry ->
+                        // Only create samplesheet for DNA samples
+                        entry.value.get('type').toLowerCase() == 'dna' &&
+                        entry.value.get('tag').toLowerCase() in ['wes', 'wgs']
+                    }
+                    .values()
+                    *.subKeys([
+                        ['id', 'sample'],
+                        'cram',
+                        'crai'
+                    ]),
                 location.resolve('nfcmgg_smallvariants_samplesheet.yaml')
             )
         }
@@ -105,7 +191,7 @@ class PreprocessingObserver extends PipelineObserver {
     @Override
     Map getDefaultValuesForSample(String sample) {
         Map<String,Object> sampleData = inputData.find { entry -> entry.get('samplename', '') == sample } ?: [:]
-        String sampleType = sampleData.get('sample_type', 'DNA')
+        String sampleType = sampleData.get('sample_type', 'unknown')
         String tag = sampleData.get('tag', '')
         return [
             'strandedness': 'unknown',
@@ -120,7 +206,8 @@ class PreprocessingObserver extends PipelineObserver {
             'family': sampleData.get('family_number', null),
             'library': sampleData.get('library', null),
             'sex': sampleData.get('sex', 'U'),
-            'exomecnv_batch': (sampleData.get('library', null) as String) + '_' + sampleData.get('sex', 'U')
+            'exomecnv_batch': (sampleData.get('library', null) as String) + '_' + sampleData.get('sex', 'U'),
+            'purpose': sampleData.get('purpose', null),
         ]
     }
 

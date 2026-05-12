@@ -68,6 +68,14 @@ class OutputEntry {
         return this
     }
 
+    String get(String key) {
+        return this.values.get(key)
+    }
+
+    String get(String key, String defaultValue) {
+        return this.values.get(key, defaultValue)
+    }
+
     Map<String, String> getValues() {
         return this.values
     }

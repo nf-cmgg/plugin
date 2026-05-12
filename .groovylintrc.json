@@ -1,8 +1,11 @@
 {
-  "extends": "recommended",
-  "rules": {
-    "DuplicateStringLiteral": {
-      "enabled": false
+    "extends": "recommended",
+    "rules": {
+        "DuplicateListLiteral": {
+            "enabled": false
+        },
+        "DuplicateStringLiteral": {
+            "enabled": false
+        }
     }
-  }
 }
