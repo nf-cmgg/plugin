@@ -39,6 +39,12 @@ class PreprocessingObserver extends PipelineObserver {
         String targetName = event.target.name
         String targetPath = event.target.toUriString()
         switch (targetName) {
+            case ~/^snp_.*\.cram$/:
+                entries[safeGetSample(targetName)].add('snp_cram', targetPath)
+                break
+            case ~/^snp_.*\.cram\.crai$/:
+                entries[safeGetSample(targetName)].add('snp_crai', targetPath)
+                break            
             case ~/^.*\.cram$/:
                 entries[safeGetSample(targetName)].add('cram', targetPath)
                 break
@@ -51,10 +57,10 @@ class PreprocessingObserver extends PipelineObserver {
             case ~/^.*R2_00.\.fastq\.gz$/:
                 entries[safeGetSample(targetName)].add('fastq_2', targetPath)
                 break
-            case ~/.per_base.bed.gz$/:
+            case ~/^.*\.per-base\.bed\.gz$/:
                 entries[safeGetSample(targetName)].add('per_base_bed', targetPath)
                 break
-            case ~/.per_base.bed.gz\.tbi$/:
+            case ~/^.*\.per-base\.bed\.gz\.csi$/:
                 entries[safeGetSample(targetName)].add('per_base_bed_index', targetPath)
                 break
         }
@@ -66,7 +72,7 @@ class PreprocessingObserver extends PipelineObserver {
             entries = entries.sort()
             // nf-cmgg/sampletracking samplesheet
             creator.dump(
-                entries.values()*.subKeys([['id','sample'], 'cram', 'crai']),
+                entries.values()*.subKeys([['id','sample'], ['library', 'pool'], ['cram', 'sample_bam'], ['crai', 'sample_bam_index'], ['snp_cram', 'snp_bam'], ['snp_crai', 'snp_bam_index'], 'sex']),
                 location.resolve('nfcmgg_sampletracking_samplesheet.yaml')
             )
             // nf-core/rnafusion samplesheet
@@ -77,25 +83,26 @@ class PreprocessingObserver extends PipelineObserver {
             // nf-cmgg/vivar samplesheet
             creator.dump(
                 entries.values()*.subKeys(
-                    [['id','sample'], 'organism', 'tag', 'normdup', 'nipt', 'binsize', 'project_id', ['cram', 'reads'], ['crai', 'reads_index']]
+                    ['id', 'organism', 'tag', 'binsize', ['vivar_project', 'project'], 'sex', 'normdup', 'nipt', ['cram', 'reads'], ['crai', 'reads_index']]
                 ),
                 location.resolve('nfcmgg_vivar_samplesheet.yaml')
             )
             // nf-cmgg/exomecnv samplesheet
             creator.dump(
                 // TODO add logic for the batch
-                entries.values()*.subKeys([['id','sample'], 'family', 'cram', 'crai', ['per_base_bed', 'bed'], ['per_base_bed_index', 'bed_index']]),
+                entries.values()*.subKeys([['id','sample'], ['exomecnv_batch', 'batch'], 'family', 'cram', 'crai', ['per_base_bed', 'bed'], ['per_base_bed_index', 'bed_index']]),
                 location.resolve('nfcmgg_exomecnv_samplesheet.yaml')
             )
             // nf-cmgg/smallvariants samplesheet
             creator.dump(
-                // TODO add PED logic for smallvariants
+                // TODO add ROI in case of WES
                 entries.values()*.subKeys([['id','sample'], 'cram', 'crai']),
                 location.resolve('nfcmgg_smallvariants_samplesheet.yaml')
             )
         }
     }
 
+    @Override
     Map getDefaultValuesForSample(String sample) {
         Map<String,Object> sampleData = inputData.find { entry -> entry.get('samplename', '') == sample } ?: [:]
         String sampleType = sampleData.get('sample_type', 'DNA')
@@ -108,10 +115,12 @@ class PreprocessingObserver extends PipelineObserver {
             'sample_type': sampleType,
             'normdup': tag.toLowerCase() == 'copgt-m',
             'nipt': tag.toLowerCase() == 'cfdnaseq',
-            // TODO check all following fields once they've been added to the sample info file
             'binsize': sampleData.get('binsize', null),
-            'project_id': sampleData.get('project_id', null),
-            'family': sampleData.get('family', null)
+            'vivar_project': sampleData.get('vivar_project', null),
+            'family': sampleData.get('family_number', null),
+            'library': sampleData.get('library', null),
+            'sex': sampleData.get('sex', 'U'),
+            'exomecnv_batch': (sampleData.get('library', null) as String) + '_' + sampleData.get('sex', 'U')
         ]
     }
 
