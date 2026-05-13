@@ -71,8 +71,12 @@ class PreprocessingObserver extends PipelineObserver {
     void onFlowComplete() {
         if (!session.success) { return }
         entries = entries.findAll { entry ->
-            // Only retain diagnostic samples for the samplesheets
-            entry.value.get('purpose').toLowerCase() == 'diagnostic'
+            // Only retain diagnostic samples of human data for the samplesheets
+            entry.value.get('purpose')?.toLowerCase() == 'diagnostic' &&
+            (
+                entry.value.get('organism')?.toLowerCase() == 'homo sapiens' ||
+                entry.value.get('genome')?.toLowerCase() == 'grch38'
+            )
         }
         entries = entries.sort()
 
@@ -83,8 +87,8 @@ class PreprocessingObserver extends PipelineObserver {
             entries
                 .findAll { entry ->
                     // Only create samplesheet for WES and WGS runs of DNA samples
-                    entry.value.get('type').toLowerCase() == 'dna' &&
-                    entry.value.get('tag').toLowerCase() in ['wes', 'wgs']
+                    entry.value.get('sample_type')?.toLowerCase() == 'dna' &&
+                    entry.value.get('tag')?.toLowerCase() in ['wes', 'wgs']
                 }
                 .values()
                 *.subKeys([
@@ -105,9 +109,10 @@ class PreprocessingObserver extends PipelineObserver {
         creator.dump(
             entries
                 .findAll { entry ->
-                    // Only create samplesheet for RNAseqMDG runs of RNA samples
-                    entry.value.get('type').toLowerCase() == 'rna' &&
-                    entry.value.get('tag').toLowerCase() == 'rnaseqmdg'
+                    // Only create samplesheet for RNAseqMDG runs of RNA samples that have FASTQ output
+                    entry.value.get('sample_type')?.toLowerCase() == 'rna' &&
+                    entry.value.get('tag')?.toLowerCase() == 'rnaseqmdg' &&
+                    entry.value.get('fastq_1')
                 }
                 .values()
                 *.subKeys([
@@ -126,7 +131,7 @@ class PreprocessingObserver extends PipelineObserver {
             entries
                 .findAll { entry ->
                     // Only create samplesheet for DNA samples
-                    entry.value.get('type').toLowerCase() == 'dna'
+                    entry.value.get('sample_type')?.toLowerCase() == 'dna'
                 }
                 .values()
                 *.subKeys([
@@ -151,8 +156,8 @@ class PreprocessingObserver extends PipelineObserver {
             entries
                 .findAll { entry ->
                     // Only create samplesheet for WES runs of DNA samples
-                    entry.value.get('type').toLowerCase() == 'dna' &&
-                    entry.value.get('tag').toLowerCase() in ['wes']
+                    entry.value.get('sample_type')?.toLowerCase() == 'dna' &&
+                    entry.value.get('tag')?.toLowerCase() in ['wes']
                 }
                 .values()
                 *.subKeys([
@@ -174,8 +179,8 @@ class PreprocessingObserver extends PipelineObserver {
             entries
                 .findAll { entry ->
                     // Only create samplesheet for DNA samples
-                    entry.value.get('type').toLowerCase() == 'dna' &&
-                    entry.value.get('tag').toLowerCase() in ['wes', 'wgs']
+                    entry.value.get('sample_type')?.toLowerCase() == 'dna' &&
+                    entry.value.get('tag')?.toLowerCase() in ['wes', 'wgs']
                 }
                 .values()
                 *.subKeys([
@@ -190,7 +195,7 @@ class PreprocessingObserver extends PipelineObserver {
     @Override
     Map getDefaultValuesForSample(String sample) {
         Map<String,Object> sampleData = inputData.find { entry -> entry.get('samplename', '') == sample } ?: [:]
-        String sampleType = sampleData.get('sample_type', 'unknown')
+        String sampleType = sampleData.get('sample_type', 'DNA')
         String tag = sampleData.get('tag', '')
         return [
             'strandedness': 'unknown',
