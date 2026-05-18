@@ -71,12 +71,9 @@ class PreprocessingObserver extends PipelineObserver {
     void onFlowComplete() {
         if (!session.success) { return }
         entries = entries.findAll { entry ->
-            // Only retain diagnostic samples of human data for the samplesheets
-            entry.value.get('purpose')?.toLowerCase() == 'diagnostic' &&
-            (
-                entry.value.get('organism')?.toLowerCase() == 'homo sapiens' ||
-                entry.value.get('genome')?.toLowerCase() == 'grch38'
-            )
+            // Only retain samples of human data for the samplesheets
+            entry.value.get('organism')?.toLowerCase() == 'homo sapiens' ||
+            entry.value.get('genome')?.toLowerCase() == 'grch38'
         }
         entries = entries.sort()
 
@@ -211,7 +208,6 @@ class PreprocessingObserver extends PipelineObserver {
             'library': sampleData.get('library', null),
             'sex': sampleData.get('sex', 'U'),
             'exomecnv_batch': (sampleData.get('library', null) as String) + '_' + sampleData.get('sex', 'U'),
-            'purpose': sampleData.get('purpose', null),
         ]
     }
 
