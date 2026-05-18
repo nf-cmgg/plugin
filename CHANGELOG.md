@@ -2,7 +2,7 @@
 
 Removed the filter step on `purpose` fields in the preprocssing samplesheets
 
-## 0.2.1
+## 0.2.0
 
 This release adds full support for all diagnostic pipelines used until now
 
