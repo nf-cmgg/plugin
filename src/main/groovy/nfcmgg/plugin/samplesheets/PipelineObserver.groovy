@@ -67,7 +67,7 @@ class PipelineObserver implements TraceObserverV2 {
     void onFlowCreate(Session session) {
         this.location = this.location ?: getSamplesheetOutdir(session)
         this.inputData = getInputSamplesheetList(session)
-        this.samples = inputData*.get(sampleKey).findAll { sample -> sample != null}.toSet() as Set<String>
+        this.samples = inputData*.get(sampleKey).findAll { sample -> sample != null }.toSet() as Set<String>
         this.session = session
         log.info("Samplesheets will be generated in '$location'")
     }
@@ -83,7 +83,7 @@ class PipelineObserver implements TraceObserverV2 {
     }
 
     /**
-     * Safely get the sample name for a given base path. 
+     * Safely get the sample name for a given base path.
      * This method will try to find the best matching sample name from the input samplesheet based on the base path.
      * If no match is found, it will use the sample name extracted from the base path.
      * If multiple matches are found, it will use the longest match and log a warning.

@@ -67,4 +67,5 @@ class OutputEntryTest extends Specification {
         entry.values == [id: 'test', cram: 'test.cram']
         mainEntry.values == values
     }
+
 }
