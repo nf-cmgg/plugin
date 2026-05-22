@@ -137,9 +137,9 @@ class PreprocessingObserver extends PipelineObserver {
                     'tag',
                     'binsize',
                     ['vivar_project', 'project'],
-                    'sex',
                     'normdup',
                     'nipt',
+                    ['family_number', 'proband'],
                     ['cram', 'reads'],
                     ['crai', 'reads_index']
                 ]),
