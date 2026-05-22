@@ -1,11 +1,11 @@
 {
-    "extends": "recommended",
-    "rules": {
-        "DuplicateListLiteral": {
-            "enabled": false
-        },
-        "DuplicateStringLiteral": {
-            "enabled": false
-        }
+  "extends": "recommended",
+  "rules": {
+    "DuplicateListLiteral": {
+      "enabled": false
+    },
+    "DuplicateStringLiteral": {
+      "enabled": false
     }
+  }
 }
