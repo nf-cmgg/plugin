@@ -4,6 +4,9 @@
     "DuplicateListLiteral": {
       "enabled": false
     },
+    "DuplicateNumberLiteral": {
+      "enabled": false
+    },
     "DuplicateStringLiteral": {
       "enabled": false
     }

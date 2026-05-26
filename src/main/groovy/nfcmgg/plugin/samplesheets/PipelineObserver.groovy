@@ -94,10 +94,13 @@ class PipelineObserver implements TraceObserverV2 {
      * @param basePath the base path for which to get the sample name
      * @return the sample name for the given base path
      */
-    protected String safeGetSample(String basePath) {
+    protected String safeGetSample(String inputBasePath) {
+        String basePath
         // Make sure SNP tracking data will be added to the correct sample
         if (basePath.startsWith('snp_')) {
-            basePath = basePath.replaceFirst('snp_', '')
+            basePath = inputBasePath.replaceFirst('snp_', '')
+        } else {
+            basePath = inputBasePath
         }
         List<String> possibleSamples = samples
             .findAll { sample -> basePath.startsWith(sample) }.toList() as List<String>
