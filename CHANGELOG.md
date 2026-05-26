@@ -1,3 +1,8 @@
+## 0.2.4
+
+1. Fixed samplesheets being empty in 0.2.3
+2. Added a filter for rnafusion samplesheets. Samples with less than 1 million reads will now be put in a `nfcore_rnafusion_samplesheet_failed.yaml` file
+
 ## 0.2.3
 
 Added `tissue` samples to the vivar samplesheet

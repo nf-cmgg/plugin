@@ -38,6 +38,23 @@ class PreprocessingObserver extends PipelineObserver {
     void onFilePublish(FilePublishEvent event) {
         String targetName = event.target.name
         String targetPath = event.target.toUriString()
+
+        // Get metrics after demultiplexing
+        if (targetPath.endsWith('_SAV_data') && event.source.isDirectory()) {
+            Path bysamples = event.source.resolve('multiqc_bclconvert_bysample.txt')
+            if (bysamples.exists()) {
+                List<Map> sampleMetrics = bysamples.splitCsv(header:true, sep:'\t')
+                sampleMetrics.each { metric ->
+                    String sample = metric['Sample']
+                    String yield = metric['yield_']
+                    if (entries.containsKey(sample)) {
+                        entries[sample].add('yield', yield)
+                    }
+                }
+            }
+        }
+
+        // Get specific files
         switch (targetName) {
             case ~/^snp_.*\.cram$/:
                 entries[safeGetSample(targetName)].add('snp_cram', targetPath)
@@ -103,22 +120,42 @@ class PreprocessingObserver extends PipelineObserver {
         //
         // nf-core/rnafusion samplesheet
         //
+
+        Map<String, OutputEntry> rnafusionEntries = entries
+            .findAll { entry ->
+                // Only create samplesheet for RNAseqMDG runs of RNA samples that have FASTQ output
+                entry.value.get('sample_type')?.toLowerCase() == 'rna' &&
+                entry.value.get('tag')?.toLowerCase() == 'rnaseqmdg' &&
+                entry.value.get('fastq_1')
+            }
+        List rnafusionKeys = [
+            ['id', 'sample'],
+            'fastq_1',
+            'fastq_2',
+            'strandedness',
+            ['yield', 'reads']
+        ]
+
+        // Passed data
         creator.dump(
-            entries
+            rnafusionEntries
                 .findAll { entry ->
-                    // Only create samplesheet for RNAseqMDG runs of RNA samples that have FASTQ output
-                    entry.value.get('sample_type')?.toLowerCase() == 'rna' &&
-                    entry.value.get('tag')?.toLowerCase() == 'rnaseqmdg' &&
-                    entry.value.get('fastq_1')
+                    entry.value.get('yield').toInteger() >= 1000000
                 }
                 .values()
-                *.subKeys([
-                    ['id', 'sample'],
-                    'fastq_1',
-                    'fastq_2',
-                    'strandedness'
-                ]),
+                *.subKeys(rnafusionKeys),
             location.resolve('nfcore_rnafusion_samplesheet.yaml')
+        )
+
+        // Failed data
+        creator.dump(
+            rnafusionEntries
+                .findAll { entry ->
+                    entry.value.get('yield').toInteger() < 1000000
+                }
+                .values()
+                *.subKeys(rnafusionKeys),
+            location.resolve('nfcore_rnafusion_samplesheet_failed.yaml')
         )
 
         //
@@ -209,6 +246,7 @@ class PreprocessingObserver extends PipelineObserver {
             'library': sampleData.get('library', null),
             'sex': sampleData.get('sex', 'U'),
             'exomecnv_batch': (sampleData.get('library', null) as String) + '_' + sampleData.get('sex', 'U'),
+            'yield': -1
         ]
     }
 
