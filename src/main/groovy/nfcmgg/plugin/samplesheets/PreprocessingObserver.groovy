@@ -127,8 +127,9 @@ class PreprocessingObserver extends PipelineObserver {
         creator.dump(
             entries
                 .findAll { entry ->
+                    String type = entry.value.get('sample_type')?.toLowerCase()
                     // Only create samplesheet for DNA samples
-                    entry.value.get('sample_type')?.toLowerCase() == 'dna'
+                    type == 'dna' || type == 'tissue'
                 }
                 .values()
                 *.subKeys([
