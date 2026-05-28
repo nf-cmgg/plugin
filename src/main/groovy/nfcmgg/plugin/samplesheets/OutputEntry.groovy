@@ -47,7 +47,7 @@ class OutputEntry {
         Map<String, String> newValues = [:]
         keys.each { Object key ->
             String keyToCheck = key in String ? key as String : (key as List<String>)[0]
-            if (!values.containsKey(keyToCheck)) {
+            if (!values.containsKey(keyToCheck) || values.get(keyToCheck) == null) {
                 log.warn("Key '$keyToCheck' not found in entry")
                 return
             }
