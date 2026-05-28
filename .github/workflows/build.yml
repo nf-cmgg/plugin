@@ -37,11 +37,19 @@ jobs:
           architecture: x64
           cache: gradle
 
-      - name: Compile
-        run: ./gradlew assemble
+      - name: Setup Nextflow
+        uses: nf-core/setup-nextflow@b4ec1bc7c16a94435159de94a05253542fddf6ef # v3
+        with:
+          version: "latest-stable"
+
+      - name: Install nf-test
+        uses: nf-core/setup-nf-test@4069fbbaabe94c08faba4ad261bfa88225ba133f # v2
+        with:
+          version: "0.9.5"
+          install-pdiff: true
 
       - name: Tests
-        run: ./gradlew check
+        run: make test
         env:
           GRADLE_OPTS: '-Dorg.gradle.daemon=false'
 

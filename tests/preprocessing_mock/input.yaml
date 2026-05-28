@@ -1,0 +1,60 @@
+# - id:
+#   samplename:
+#   organism:
+#   genome:
+#   tag:
+#   aligner:
+#   sample_type:
+#   binsize:
+#   vivar_project:
+#   family_number:
+#   library:
+#   sex:
+#   sample_info:
+## A standard DNA sample (WGS)
+- id: D123456WGS
+  samplename: D123456WGS
+  organism: Homo sapiens
+  tag: WGS
+  aligner: snap
+  sample_type: DNA
+  binsize: 10
+  vivar_project: test_project
+  family_number: Proband_123456
+  library: WGS_prep
+  sex: M
+## A standard DNA sample (WES)
+- id: D123456WES
+  samplename: D123456WES
+  organism: Homo sapiens
+  tag: WES
+  aligner: snap
+  sample_type: DNA
+  binsize: 15
+  vivar_project: test_project
+  family_number: Proband_123456
+  library: WES_prep
+  sex: F
+## A standard RNA sample (rnafusion) - passed
+- id: R123456
+  samplename: R123456
+  genome: GRCh38
+  tag: RNAseqMDG
+  aligner: false
+  sample_type: RNA
+  family_number: Proband_123456
+  library: RNA_prep
+  reads_to_use_in_test: 1200000
+## A standard RNA sample (rnafusion) - failed
+- id: R654321
+  samplename: R654321
+  genome: GRCh38
+  tag: RNAseqMDG
+  aligner: false
+  sample_type: RNA
+  family_number: Proband_123456
+  library: RNA_prep
+  reads_to_use_in_test: 150
+## Flowcell
+- id: flowcell
+  sample_info: ../../../tests/preprocessing_mock/sampleinfo.yaml

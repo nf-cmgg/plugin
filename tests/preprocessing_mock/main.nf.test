@@ -1,0 +1,25 @@
+nextflow_pipeline {
+
+    name "Test Workflow main.nf"
+    script "./main.nf"
+
+    test("Test preprocessing mock") {
+
+        config "./nextflow.config"
+
+        when {
+            params {
+                outdir = "${outputDir}"
+            }
+        }
+
+        then {
+            assert workflow.success
+            assert snapshot(path("${outputDir}/samplesheets/").list().collectEntries { f ->
+                [f.toString().tokenize("/")[-1], f.text.tokenize('\n')]
+            }).match()
+        }
+
+    }
+
+}

@@ -1,0 +1,34 @@
+# - id:
+#   samplename:
+#   organism:
+#   genome:
+#   tag:
+#   aligner:
+#   sample_type:
+#   binsize:
+#   vivar_project:
+#   family_number:
+#   library:
+#   sex:
+## Mouse DNA sample
+- id: D123mouse
+  samplename: D123mouse
+  organism: Mus musculus
+  tag: WES
+  aligner: snap
+  sample_type: DNA
+  binsize: 100
+  vivar_project: test_project
+  family_number: mouse_family
+  library: WES_prep
+## Mitochondrial DNA
+- id: mtD123456
+  samplename: mtD123456
+  organism: Homo sapiens
+  tag: WES
+  aligner: snap
+  sample_type: DNA
+  binsize: 20
+  vivar_project: test_project
+  family_number: mito_family
+  library: mito_prep
