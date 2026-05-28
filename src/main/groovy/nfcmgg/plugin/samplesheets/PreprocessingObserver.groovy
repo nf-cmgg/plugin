@@ -47,9 +47,8 @@ class PreprocessingObserver extends PipelineObserver {
                 sampleMetrics.each { metric ->
                     String sample = metric['Sample']
                     String yield = metric['yield_']
-                    if (entries.containsKey(sample)) {
-                        entries[sample].add('yield', yield)
-                    }
+                    entries.putIfAbsent(sample, new OutputEntry(['id': sample] + getDefaultValuesForSample(sample)))
+                    entries[sample].add('yield', yield)
                 }
             }
         }
