@@ -36,6 +36,7 @@ class FilesHelper {
 
     static List<Map<String, Object>> readSamplesheet(Path samplesheet) {
         if (!samplesheet.exists()) {
+            log.warn("Could not read samplesheet: ${samplesheet.toUriString()}")
             return []
         }
         String extension = samplesheet.extension
