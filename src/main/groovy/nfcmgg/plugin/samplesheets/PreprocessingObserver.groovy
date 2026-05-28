@@ -87,18 +87,24 @@ class PreprocessingObserver extends PipelineObserver {
     @Override
     void onFlowComplete() {
         if (!session.success) { return }
-        entries = entries.findAll { entry ->
+        entries = entries.sort()
+        Map<String, OutputEntry> humanEntries = entries.findAll { entry ->
             // Only retain samples of human data for the samplesheets
             entry.value.get('organism')?.toLowerCase() == 'homo sapiens' ||
             entry.value.get('genome')?.toLowerCase() == 'grch38'
         }
-        entries = entries.sort()
+
+        Map<String, OutputEntry> mouseEntries = entries.findAll { entry ->
+            // Only retain samples of human data for the samplesheets
+            entry.value.get('organism')?.toLowerCase() == 'mus musculus' ||
+            entry.value.get('genome')?.toLowerCase() == 'mm10'
+        }
 
         //
         // nf-cmgg/sampletracking samplesheet
         //
         creator.dump(
-            entries
+            humanEntries
                 .findAll { entry ->
                     // Only create samplesheet for WES and WGS runs of DNA samples
                     entry.value.get('sample_type')?.toLowerCase() == 'dna' &&
@@ -121,7 +127,7 @@ class PreprocessingObserver extends PipelineObserver {
         // nf-core/rnafusion samplesheet
         //
 
-        Map<String, OutputEntry> rnafusionEntries = entries
+        Map<String, OutputEntry> rnafusionEntries = humanEntries
             .findAll { entry ->
                 // Only create samplesheet for RNAseqMDG runs of RNA samples that have FASTQ output
                 entry.value.get('sample_type')?.toLowerCase() == 'rna' &&
@@ -162,11 +168,11 @@ class PreprocessingObserver extends PipelineObserver {
         // nf-cmgg/vivar samplesheet
         //
         creator.dump(
-            entries
+            (humanEntries + mouseEntries)
                 .findAll { entry ->
                     String type = entry.value.get('sample_type')?.toLowerCase()
-                    // Only create samplesheet for DNA samples
-                    type == 'dna' || type == 'tissue'
+                    // Only create samplesheet for DNA and tissue samples that are not mitochondrial
+                    (type == 'dna' || type == 'tissue') && !entry.value.get('id')?.startsWith('mtD')
                 }
                 .values()
                 *.subKeys([
@@ -188,7 +194,7 @@ class PreprocessingObserver extends PipelineObserver {
         // nf-cmgg/exomecnv samplesheet
         //
         creator.dump(
-            entries
+            humanEntries
                 .findAll { entry ->
                     // Only create samplesheet for WES runs of DNA samples
                     entry.value.get('sample_type')?.toLowerCase() == 'dna' &&
@@ -211,7 +217,7 @@ class PreprocessingObserver extends PipelineObserver {
         // nf-cmgg/smallvariants samplesheet
         //
         creator.dump(
-            entries
+            humanEntries
                 .findAll { entry ->
                     // Only create samplesheet for DNA samples
                     entry.value.get('sample_type')?.toLowerCase() == 'dna' &&
