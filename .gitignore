@@ -12,6 +12,8 @@ results
 *.yaml
 *.yml
 DONE
+!tests/*/*.yaml
+.nf-test*
 
 # pixi environments
 .pixi/*

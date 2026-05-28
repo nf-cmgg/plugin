@@ -1,3 +1,8 @@
+## 0.2.5
+
+1. `null` values won't be put in the samplesheet but will throw a warning instead
+2. Add mouse data and remove mitochondrial data from the vivar samplesheet
+
 ## 0.2.4
 
 1. Fixed samplesheets being empty in 0.2.3

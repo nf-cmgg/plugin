@@ -1,0 +1,106 @@
+{
+    "Test preprocessing mock": {
+        "content": [
+            {
+                "nfcmgg_exomecnv_samplesheet.yaml": [
+                    "- sample: D123456WES",
+                    "  batch: WES_prep_F",
+                    "  family: Proband_123456",
+                    "  cram: D123456WES.cram",
+                    "  crai: D123456WES.cram.crai",
+                    "  bed: D123456WES.per-base.bed.gz",
+                    "  bed_index: D123456WES.per-base.bed.gz.csi",
+                    "- sample: mtD123456",
+                    "  batch: mito_prep_U",
+                    "  family: mito_family",
+                    "  cram: mtD123456.cram",
+                    "  crai: mtD123456.cram.crai",
+                    "  bed: mtD123456.per-base.bed.gz",
+                    "  bed_index: mtD123456.per-base.bed.gz.csi"
+                ],
+                "nfcmgg_sampletracking_samplesheet.yaml": [
+                    "- sample: D123456WES",
+                    "  pool: WES_prep",
+                    "  sample_bam: D123456WES.cram",
+                    "  sample_bam_index: D123456WES.cram.crai",
+                    "  snp_bam: snp_D123456WES.cram",
+                    "  snp_bam_index: snp_D123456WES.cram.crai",
+                    "  sex: F",
+                    "- sample: D123456WGS",
+                    "  pool: WGS_prep",
+                    "  sample_bam: D123456WGS.cram",
+                    "  sample_bam_index: D123456WGS.cram.crai",
+                    "  snp_bam: snp_D123456WGS.cram",
+                    "  snp_bam_index: snp_D123456WGS.cram.crai",
+                    "  sex: M",
+                    "- sample: mtD123456",
+                    "  pool: mito_prep",
+                    "  sample_bam: mtD123456.cram",
+                    "  sample_bam_index: mtD123456.cram.crai",
+                    "  snp_bam: snp_mtD123456.cram",
+                    "  snp_bam_index: snp_mtD123456.cram.crai",
+                    "  sex: U"
+                ],
+                "nfcmgg_smallvariants_samplesheet.yaml": [
+                    "- sample: D123456WES",
+                    "  cram: D123456WES.cram",
+                    "  crai: D123456WES.cram.crai",
+                    "- sample: D123456WGS",
+                    "  cram: D123456WGS.cram",
+                    "  crai: D123456WGS.cram.crai",
+                    "- sample: mtD123456",
+                    "  cram: mtD123456.cram",
+                    "  crai: mtD123456.cram.crai"
+                ],
+                "nfcmgg_vivar_samplesheet.yaml": [
+                    "- id: D123456WES",
+                    "  organism: Homo sapiens",
+                    "  tag: WES",
+                    "  binsize: 15",
+                    "  project: test_project",
+                    "  normdup: false",
+                    "  nipt: false",
+                    "  reads: D123456WES.cram",
+                    "  reads_index: D123456WES.cram.crai",
+                    "- id: D123456WGS",
+                    "  organism: Homo sapiens",
+                    "  tag: WGS",
+                    "  binsize: 10",
+                    "  project: test_project",
+                    "  normdup: false",
+                    "  nipt: false",
+                    "  reads: D123456WGS.cram",
+                    "  reads_index: D123456WGS.cram.crai",
+                    "- id: D123mouse",
+                    "  organism: Mus musculus",
+                    "  tag: WES",
+                    "  binsize: 100",
+                    "  project: test_project",
+                    "  normdup: false",
+                    "  nipt: false",
+                    "  reads: D123mouse.cram",
+                    "  reads_index: D123mouse.cram.crai"
+                ],
+                "nfcore_rnafusion_samplesheet.yaml": [
+                    "- sample: R123456",
+                    "  fastq_1: R123456_R1_001.fastq.gz",
+                    "  fastq_2: R123456_R2_001.fastq.gz",
+                    "  strandedness: unknown",
+                    "  reads: '1200000'"
+                ],
+                "nfcore_rnafusion_samplesheet_failed.yaml": [
+                    "- sample: R654321",
+                    "  fastq_1: R654321_R1_001.fastq.gz",
+                    "  fastq_2: R654321_R2_001.fastq.gz",
+                    "  strandedness: unknown",
+                    "  reads: '150'"
+                ]
+            }
+        ],
+        "timestamp": "2026-05-28T17:12:46.996334438",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.0"
+        }
+    }
+}

@@ -10,9 +10,13 @@ clean:
 	rm -rf build
 	$(GRADLE) clean
 
-# Run plugin unit tests
+# Run tests with mock pipelines
 test:
-	$(GRADLE) test
+	$(GRADLE) install && nf-test test
+
+# Run tests with mock pipelines and update the snapshots
+test-update:
+	$(GRADLE) install && nf-test test --update-snapshot
 
 # Install the plugin into local nextflow plugins dir
 install:
