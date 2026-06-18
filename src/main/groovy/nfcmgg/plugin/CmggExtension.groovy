@@ -18,6 +18,8 @@ package nfcmgg.plugin
 import groovy.transform.CompileStatic
 import nextflow.Session
 import nextflow.plugin.extension.PluginExtensionPoint
+import java.nio.file.Path
+import nextflow.plugin.extension.Function
 
 /**
  * Implements a custom function which can be imported by
@@ -25,6 +27,30 @@ import nextflow.plugin.extension.PluginExtensionPoint
  */
 @CompileStatic
 class CmggExtension extends PluginExtensionPoint {
+
+    /*
+     * Parse first line of a FASTQ file, return the flowcell id and lane number.
+     */
+    @Function
+    String flowcellLaneFromFastq(Path path) {
+        return nfcmgg.plugin.utils.FastqUtils.flowcellLaneFromFastq(path)
+    }
+
+    /*
+     * Get first line of a FASTQ file
+     */
+    @Function
+    String readFirstLineOfFastq(Path path) {
+        return nfcmgg.plugin.utils.FastqUtils.readFirstLineOfFastq(path)
+    }
+
+    /*
+     * Add readgroup to meta and remove lane
+     */
+    @Function
+    List addReadgroupToMeta(Map meta, List<Path> files, Map params) {
+        return nfcmgg.plugin.utils.FastqUtils.addReadgroupToMeta(meta, files, params)
+    }
 
     @Override
     protected void init(Session session) {
