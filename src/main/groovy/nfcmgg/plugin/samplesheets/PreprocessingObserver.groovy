@@ -145,7 +145,7 @@ class PreprocessingObserver extends PipelineObserver {
         creator.dump(
             rnafusionEntries
                 .findAll { entry ->
-                    entry.value.get('yield').toInteger() >= 1000000
+                    entry.value.get('yield').toLong() >= 1000000L
                 }
                 .values()
                 *.subKeys(rnafusionKeys),
@@ -156,7 +156,7 @@ class PreprocessingObserver extends PipelineObserver {
         creator.dump(
             rnafusionEntries
                 .findAll { entry ->
-                    entry.value.get('yield').toInteger() < 1000000
+                    entry.value.get('yield').toLong() < 1000000L
                 }
                 .values()
                 *.subKeys(rnafusionKeys),

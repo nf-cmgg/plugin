@@ -1,3 +1,7 @@
+## 0.2.6
+
+1. Convert the fastq yield to a Long type instead of Integer to prevent integer overflows
+
 ## 0.2.5
 
 1. `null` values won't be put in the samplesheet but will throw a warning instead
