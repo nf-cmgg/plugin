@@ -88,6 +88,11 @@
                     "  strandedness: unknown",
                     "  reads: '1200000'",
                     "- sample: R56789",
+                    "  fastq_1: R56789_R1_001.fastq.gz",
+                    "  fastq_2: R56789_R2_001.fastq.gz",
+                    "  strandedness: unknown",
+                    "  reads: '1200000'",
+                    "- sample: R56789",
                     "  fastq_1: R56789_R1_002.fastq.gz",
                     "  fastq_2: R56789_R2_002.fastq.gz",
                     "  strandedness: unknown",
@@ -96,22 +101,12 @@
                     "  fastq_1: R56789_R1_003.fastq.gz",
                     "  fastq_2: R56789_R2_003.fastq.gz",
                     "  strandedness: unknown",
-                    "  reads: '1200000'",
-                    "- sample: R56789",
-                    "  fastq_1: R56789_R1_001.fastq.gz",
-                    "  fastq_2: R56789_R2_001.fastq.gz",
-                    "  strandedness: unknown",
                     "  reads: '1200000'"
                 ],
                 "nfcore_rnafusion_samplesheet_failed.yaml": [
                     "- sample: R654321",
                     "  fastq_1: R654321_R1_001.fastq.gz",
                     "  fastq_2: R654321_R2_001.fastq.gz",
-                    "  strandedness: unknown",
-                    "  reads: '150'",
-                    "- sample: R654322",
-                    "  fastq_1: R654322_R1_003.fastq.gz",
-                    "  fastq_2: R654322_R2_003.fastq.gz",
                     "  strandedness: unknown",
                     "  reads: '150'",
                     "- sample: R654322",
@@ -123,11 +118,16 @@
                     "  fastq_1: R654322_R1_002.fastq.gz",
                     "  fastq_2: R654322_R2_002.fastq.gz",
                     "  strandedness: unknown",
+                    "  reads: '150'",
+                    "- sample: R654322",
+                    "  fastq_1: R654322_R1_003.fastq.gz",
+                    "  fastq_2: R654322_R2_003.fastq.gz",
+                    "  strandedness: unknown",
                     "  reads: '150'"
                 ]
             }
         ],
-        "timestamp": "2026-07-06T16:53:39.60987321",
+        "timestamp": "2026-07-06T17:03:47.52897533",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "26.04.0"

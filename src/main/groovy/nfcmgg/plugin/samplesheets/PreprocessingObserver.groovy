@@ -164,14 +164,14 @@ class PreprocessingObserver extends PipelineObserver {
                     [lane, fastq2]
                 }
 
-                entry.get('fastq_1').each { fastq1 ->
+                (entry.get('fastq_1') as List<String>).sort().each { fastq1 ->
                     Matcher match = fastq1 =~ ~/^.*R1_(\d\d\d)\.fastq\.gz$/
                     if (!match.find()) {
                         log.warn("Could not find lane for fastq1 file '$fastq1', skipping this file")
                         return
                     }
                     String lane = match.group(1)
-                    String fastq2 = fastq2Lanes.get(lane, "")
+                    String fastq2 = fastq2Lanes.get(lane, '')
                     passedEntries << new OutputEntry(entry.values.clone() as Map<String,Object>)
                         .add('fastq_1', fastq1)
                         .add('fastq_2', fastq2)
@@ -202,14 +202,14 @@ class PreprocessingObserver extends PipelineObserver {
                     [lane, fastq2]
                 }
 
-                entry.get('fastq_1').each { fastq1 ->
+                (entry.get('fastq_1') as List<String>).sort().each { fastq1 ->
                     Matcher match = fastq1 =~ ~/^.*R1_(\d\d\d)\.fastq\.gz$/
                     if (!match.find()) {
                         log.warn("Could not find lane for fastq1 file '$fastq1', skipping this file")
                         return
                     }
                     String lane = match.group(1)
-                    String fastq2 = fastq2Lanes.get(lane, "")
+                    String fastq2 = fastq2Lanes.get(lane, '')
                     failedEntries << new OutputEntry(entry.values.clone() as Map<String,Object>)
                         .add('fastq_1', fastq1)
                         .add('fastq_2', fastq2)
