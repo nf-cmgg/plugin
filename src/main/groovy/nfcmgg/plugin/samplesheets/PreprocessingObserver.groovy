@@ -172,7 +172,9 @@ class PreprocessingObserver extends PipelineObserver {
                     }
                     String lane = match.group(1)
                     String fastq2 = fastq2Lanes.get(lane, "")
-                    passedEntries << new OutputEntry(entry.values).add('fastq_1', fastq1).add('fastq_2', fastq2)
+                    passedEntries << new OutputEntry(entry.values.clone() as Map<String,Object>)
+                        .add('fastq_1', fastq1)
+                        .add('fastq_2', fastq2)
                 }
             }
 
@@ -208,7 +210,9 @@ class PreprocessingObserver extends PipelineObserver {
                     }
                     String lane = match.group(1)
                     String fastq2 = fastq2Lanes.get(lane, "")
-                    failedEntries << new OutputEntry(entry.values).add('fastq_1', fastq1).add('fastq_2', fastq2)
+                    failedEntries << new OutputEntry(entry.values.clone() as Map<String,Object>)
+                        .add('fastq_1', fastq1)
+                        .add('fastq_2', fastq2)
                 }
             }
 
