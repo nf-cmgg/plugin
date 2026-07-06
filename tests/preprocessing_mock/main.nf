@@ -12,7 +12,6 @@ workflow {
             input.addAll(new groovy.yaml.YamlSlurper().parseText(file(entry.sample_info).text))
         }
     }
-    println input.findAll { entry -> entry.sample_type == 'RNA'}
     MOCK_OUTPUT(input)
 
     publish:

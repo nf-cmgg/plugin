@@ -19,6 +19,7 @@ import groovy.util.logging.Slf4j
 import groovy.transform.CompileStatic
 
 import java.nio.file.Path
+import java.util.regex.Matcher
 
 import nextflow.trace.event.FilePublishEvent
 
@@ -47,7 +48,10 @@ class PreprocessingObserver extends PipelineObserver {
                 sampleMetrics.each { metric ->
                     String sample = metric['Sample']
                     String yield = metric['yield_']
-                    entries.putIfAbsent(sample, new OutputEntry(['id': sample] + getDefaultValuesForSample(sample)))
+                    entries.putIfAbsent(
+                        sample,
+                        new OutputEntry(['id': sample] as Map<String, Object> + getDefaultValuesForSample(sample))
+                    )
                     entries[sample].add('yield', yield)
                 }
             }
@@ -67,11 +71,11 @@ class PreprocessingObserver extends PipelineObserver {
             case ~/^.*\.crai$/:
                 entries[safeGetSample(targetName)].add('crai', targetPath)
                 break
-            case ~/^.*R1_00.\.fastq\.gz$/:
-                entries[safeGetSample(targetName)].add('fastq_1', targetPath)
+            case ~/^.*R1_\d\d\d\.fastq\.gz$/:
+                entries[safeGetSample(targetName)].append('fastq_1', targetPath)
                 break
-            case ~/^.*R2_00.\.fastq\.gz$/:
-                entries[safeGetSample(targetName)].add('fastq_2', targetPath)
+            case ~/^.*R2_\d\d\d\.fastq\.gz$/:
+                entries[safeGetSample(targetName)].append('fastq_2', targetPath)
                 break
             case ~/^.*\.per-base\.bed\.gz$/:
                 entries[safeGetSample(targetName)].add('per_base_bed', targetPath)
@@ -89,14 +93,14 @@ class PreprocessingObserver extends PipelineObserver {
         entries = entries.sort()
         Map<String, OutputEntry> humanEntries = entries.findAll { entry ->
             // Only retain samples of human data for the samplesheets
-            entry.value.get('organism')?.toLowerCase() == 'homo sapiens' ||
-            entry.value.get('genome')?.toLowerCase() == 'grch38'
+            entry.value.getAsString('organism')?.toLowerCase() == 'homo sapiens' ||
+            entry.value.getAsString('genome')?.toLowerCase() == 'grch38'
         }
 
         Map<String, OutputEntry> mouseEntries = entries.findAll { entry ->
-            // Only retain samples of human data for the samplesheets
-            entry.value.get('organism')?.toLowerCase() == 'mus musculus' ||
-            entry.value.get('genome')?.toLowerCase() == 'mm10'
+            // Only retain samples of mouse data for the samplesheets
+            entry.value.getAsString('organism')?.toLowerCase() == 'mus musculus' ||
+            entry.value.getAsString('genome')?.toLowerCase() == 'mm10'
         }
 
         //
@@ -106,8 +110,8 @@ class PreprocessingObserver extends PipelineObserver {
             humanEntries
                 .findAll { entry ->
                     // Only create samplesheet for WES and WGS runs of DNA samples
-                    entry.value.get('sample_type')?.toLowerCase() == 'dna' &&
-                    entry.value.get('tag')?.toLowerCase() in ['wes', 'wgs']
+                    entry.value.getAsString('sample_type')?.toLowerCase() == 'dna' &&
+                    entry.value.getAsString('tag')?.toLowerCase() in ['wes', 'wgs']
                 }
                 .values()
                 *.subKeys([
@@ -129,9 +133,9 @@ class PreprocessingObserver extends PipelineObserver {
         Map<String, OutputEntry> rnafusionEntries = humanEntries
             .findAll { entry ->
                 // Only create samplesheet for RNAseqMDG runs of RNA samples that have FASTQ output
-                entry.value.get('sample_type')?.toLowerCase() == 'rna' &&
-                entry.value.get('tag')?.toLowerCase() == 'rnaseqmdg' &&
-                entry.value.get('fastq_1')
+                entry.value.getAsString('sample_type')?.toLowerCase() == 'rna' &&
+                entry.value.getAsString('tag')?.toLowerCase() == 'rnaseqmdg' &&
+                entry.value.getAsString('fastq_1')
             }
         List rnafusionKeys = [
             ['id', 'sample'],
@@ -142,24 +146,74 @@ class PreprocessingObserver extends PipelineObserver {
         ]
 
         // Passed data
-        creator.dump(
-            rnafusionEntries
-                .findAll { entry ->
-                    entry.value.get('yield').toLong() >= 1000000L
+        List<OutputEntry> passedEntries = []
+        rnafusionEntries
+            .findAll { entry ->
+                entry.value.getAsString('yield').toLong() >= 1000000L
+            }
+            .values()
+            *.subKeys(rnafusionKeys)
+            .each { OutputEntry entry ->
+                Map<String, String> fastq2Lanes = (entry.get('fastq_2', []) as List<String>).collectEntries { fastq2 ->
+                    Matcher match = fastq2 =~ ~/^.*R2_(\d\d\d)\.fastq\.gz$/
+                    if (!match.find()) {
+                        log.warn("Could not find lane for fastq2 file '$fastq2', skipping this file")
+                        return
+                    }
+                    String lane = match.group(1)
+                    [lane, fastq2]
                 }
-                .values()
-                *.subKeys(rnafusionKeys),
+
+                entry.get('fastq_1').each { fastq1 ->
+                    Matcher match = fastq1 =~ ~/^.*R1_(\d\d\d)\.fastq\.gz$/
+                    if (!match.find()) {
+                        log.warn("Could not find lane for fastq1 file '$fastq1', skipping this file")
+                        return
+                    }
+                    String lane = match.group(1)
+                    String fastq2 = fastq2Lanes.get(lane, "")
+                    passedEntries << new OutputEntry(entry.values).add('fastq_1', fastq1).add('fastq_2', fastq2)
+                }
+            }
+
+        creator.dump(
+            passedEntries,
             location.resolve('nfcore_rnafusion_samplesheet.yaml')
         )
 
         // Failed data
-        creator.dump(
-            rnafusionEntries
-                .findAll { entry ->
-                    entry.value.get('yield').toLong() < 1000000L
+        List<OutputEntry> failedEntries = []
+        rnafusionEntries
+            .findAll { entry ->
+                entry.value.getAsString('yield').toLong() < 1000000L
+            }
+            .values()
+            *.subKeys(rnafusionKeys)
+            .each { OutputEntry entry ->
+                Map<String, String> fastq2Lanes = (entry.get('fastq_2', []) as List<String>).collectEntries { fastq2 ->
+                    Matcher match = fastq2 =~ ~/^.*R2_(\d\d\d)\.fastq\.gz$/
+                    if (!match.find()) {
+                        log.warn("Could not find lane for fastq2 file '$fastq2', skipping this file")
+                        return
+                    }
+                    String lane = match.group(1)
+                    [lane, fastq2]
                 }
-                .values()
-                *.subKeys(rnafusionKeys),
+
+                entry.get('fastq_1').each { fastq1 ->
+                    Matcher match = fastq1 =~ ~/^.*R1_(\d\d\d)\.fastq\.gz$/
+                    if (!match.find()) {
+                        log.warn("Could not find lane for fastq1 file '$fastq1', skipping this file")
+                        return
+                    }
+                    String lane = match.group(1)
+                    String fastq2 = fastq2Lanes.get(lane, "")
+                    failedEntries << new OutputEntry(entry.values).add('fastq_1', fastq1).add('fastq_2', fastq2)
+                }
+            }
+
+        creator.dump(
+            failedEntries,
             location.resolve('nfcore_rnafusion_samplesheet_failed.yaml')
         )
 
@@ -169,9 +223,9 @@ class PreprocessingObserver extends PipelineObserver {
         creator.dump(
             (humanEntries + mouseEntries)
                 .findAll { entry ->
-                    String type = entry.value.get('sample_type')?.toLowerCase()
+                    String type = entry.value.getAsString('sample_type')?.toLowerCase()
                     // Only create samplesheet for DNA and tissue samples that are not mitochondrial
-                    (type == 'dna' || type == 'tissue') && !entry.value.get('id')?.startsWith('mtD')
+                    (type == 'dna' || type == 'tissue') && !entry.value.getAsString('id')?.startsWith('mtD')
                 }
                 .values()
                 *.subKeys([
@@ -196,8 +250,8 @@ class PreprocessingObserver extends PipelineObserver {
             humanEntries
                 .findAll { entry ->
                     // Only create samplesheet for WES runs of DNA samples
-                    entry.value.get('sample_type')?.toLowerCase() == 'dna' &&
-                    entry.value.get('tag')?.toLowerCase() in ['wes']
+                    entry.value.getAsString('sample_type')?.toLowerCase() == 'dna' &&
+                    entry.value.getAsString('tag')?.toLowerCase() in ['wes']
                 }
                 .values()
                 *.subKeys([
@@ -219,8 +273,8 @@ class PreprocessingObserver extends PipelineObserver {
             humanEntries
                 .findAll { entry ->
                     // Only create samplesheet for DNA samples
-                    entry.value.get('sample_type')?.toLowerCase() == 'dna' &&
-                    entry.value.get('tag')?.toLowerCase() in ['wes', 'wgs']
+                    entry.value.getAsString('sample_type')?.toLowerCase() == 'dna' &&
+                    entry.value.getAsString('tag')?.toLowerCase() in ['wes', 'wgs']
                 }
                 .values()
                 *.subKeys([
