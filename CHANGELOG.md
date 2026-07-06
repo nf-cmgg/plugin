@@ -1,3 +1,7 @@
+## 0.2.7
+
+1. Rnafusion samplesheets will now contain multiple entries of the same sample when fastq files from multiple lanes are created by nf-cmgg/preprocessing
+
 ## 0.2.6
 
 1. Convert the fastq yield to a Long type instead of Integer to prevent integer overflows
