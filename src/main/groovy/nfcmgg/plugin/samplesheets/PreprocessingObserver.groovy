@@ -50,7 +50,7 @@ class PreprocessingObserver extends PipelineObserver {
                     String yield = metric['yield_']
                     entries.putIfAbsent(
                         sample,
-                        new OutputEntry(['id': sample] as Map<String, Object> + getDefaultValuesForSample(sample))
+                        new OutputEntry(['id': sample] + getDefaultValuesForSample(sample))
                     )
                     entries[sample].add('yield', yield)
                 }

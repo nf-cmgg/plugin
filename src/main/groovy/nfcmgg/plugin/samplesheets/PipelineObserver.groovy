@@ -120,7 +120,7 @@ class PipelineObserver implements TraceObserverV2 {
                     "Multiple possible samples found for path '$basePath': $possibleSamples, using '$sample' as sample name, because it is the longest match"
                 )
         }
-        entries.putIfAbsent(sample, new OutputEntry(['id': sample] as Map<String, Object> + getDefaultValuesForSample(sample)))
+        entries.putIfAbsent(sample, new OutputEntry(['id': sample] + getDefaultValuesForSample(sample)))
         return sample
     }
 
