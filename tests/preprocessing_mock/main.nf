@@ -12,7 +12,6 @@ workflow {
             input.addAll(new groovy.yaml.YamlSlurper().parseText(file(entry.sample_info).text))
         }
     }
-    println input.findAll { entry -> entry.sample_type == 'RNA'}
     MOCK_OUTPUT(input)
 
     publish:
@@ -35,7 +34,15 @@ process MOCK_OUTPUT {
     script:
     def fastqs = input_list
         .findAll { entry -> entry.aligner == false }
-        .collect { entry -> "echo '' | gzip > ${entry.samplename}_R1_001.fastq.gz && echo '' | gzip > ${entry.samplename}_R2_001.fastq.gz"}
+        .collect { entry ->
+            def lanes = entry.lanes?.toInteger() ?: 1
+            def fastq_echos = (lanes > 1 ? 1..lanes : [1])
+                .collect { lane ->
+                    "echo '' | gzip > ${entry.samplename}_R1_00${lane}.fastq.gz && echo '' | gzip > ${entry.samplename}_R2_00${lane}.fastq.gz"
+                }
+            return fastq_echos
+        }
+        .flatten()
         .join("\n    ")
     def crams = input_list
         .findAll { entry -> entry.aligner instanceof String }

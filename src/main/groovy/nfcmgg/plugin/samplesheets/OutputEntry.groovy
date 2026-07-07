@@ -29,9 +29,9 @@ import groovy.util.logging.Slf4j
 @CompileDynamic
 class OutputEntry {
 
-    final private Map<String, String> values
+    final private Map<String, Object> values
 
-    OutputEntry(Map<String, String> defaultValues = [:]) {
+    OutputEntry(Map<String, Object> defaultValues = [:]) {
         this.values = defaultValues
     }
 
@@ -63,20 +63,32 @@ class OutputEntry {
         return newEntry
     }
 
-    OutputEntry add(String key, String value) {
+    OutputEntry append(String key, String value) {
+        if (!this.values.containsKey(key)) {
+            this.values[key] = []
+        }
+        this.values[key] << value
+        return this
+    }
+
+    OutputEntry add(String key, Object value) {
         this.values[key] = value
         return this
     }
 
-    String get(String key) {
+    String getAsString(String key) {
+        return this.values.get(key)?.toString()
+    }
+
+    Object get(String key) {
         return this.values.get(key)
     }
 
-    String get(String key, String defaultValue) {
+    Object get(String key, Object defaultValue) {
         return this.values.get(key, defaultValue)
     }
 
-    Map<String, String> getValues() {
+    Map<String, Object> getValues() {
         return this.values
     }
 

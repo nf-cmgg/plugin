@@ -78,7 +78,7 @@ class PipelineObserver implements TraceObserverV2 {
      * @return a map of key-value pairs to be added to the sample entry when it is first created
      */
     /* groovylint-disable-next-line UnusedMethodParameter */
-    Map getDefaultValuesForSample(String sample) {
+    Map<String, Object> getDefaultValuesForSample(String sample) {
         return [:]
     }
 
@@ -120,7 +120,11 @@ class PipelineObserver implements TraceObserverV2 {
                     "Multiple possible samples found for path '$basePath': $possibleSamples, using '$sample' as sample name, because it is the longest match"
                 )
         }
-        entries.putIfAbsent(sample, new OutputEntry(['id': sample] + getDefaultValuesForSample(sample)))
+        entries.putIfAbsent(
+            sample,
+            /* groovylint-disable-next-line UnnecessaryCast */
+            new OutputEntry(['id': sample] as Map<String, Object> + getDefaultValuesForSample(sample))
+        )
         return sample
     }
 

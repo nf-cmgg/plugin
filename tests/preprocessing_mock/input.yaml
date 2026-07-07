@@ -45,6 +45,17 @@
   family_number: Proband_123456
   library: RNA_prep
   reads_to_use_in_test: 1200000
+## An RNA sample with multiple lanes (rnafusion) - passed
+- id: R56789
+  samplename: R56789
+  genome: GRCh38
+  tag: RNAseqMDG
+  aligner: false
+  sample_type: RNA
+  family_number: Proband_123456
+  library: RNA_prep
+  reads_to_use_in_test: 1200000
+  lanes: 3
 ## A standard RNA sample (rnafusion) - failed
 - id: R654321
   samplename: R654321
@@ -55,6 +66,17 @@
   family_number: Proband_123456
   library: RNA_prep
   reads_to_use_in_test: 150
+## An RNA sample with multiple lanes (rnafusion) - failed
+- id: R654322
+  samplename: R654322
+  genome: GRCh38
+  tag: RNAseqMDG
+  aligner: false
+  sample_type: RNA
+  family_number: Proband_123456
+  library: RNA_prep
+  reads_to_use_in_test: 150
+  lanes: 3
 ## Flowcell
 - id: flowcell
   sample_info: ../../../tests/preprocessing_mock/sampleinfo.yaml
