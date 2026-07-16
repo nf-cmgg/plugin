@@ -1,3 +1,7 @@
+## 0.2.8
+
+1. Set the default mouse binsize to 100 if the given binsize is not 100 or 500
+
 ## 0.2.7
 
 1. Rnafusion samplesheets will now contain multiple entries of the same sample when fastq files from multiple lanes are created by nf-cmgg/preprocessing
