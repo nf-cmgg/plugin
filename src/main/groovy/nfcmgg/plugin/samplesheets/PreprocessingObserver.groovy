@@ -296,15 +296,24 @@ class PreprocessingObserver extends PipelineObserver {
         Map<String,Object> sampleData = inputData.find { entry -> entry.get('samplename', '') == sample } ?: [:]
         String sampleType = sampleData.get('sample_type', 'DNA')
         String tag = sampleData.get('tag', '')
+        String genome = sampleData.get('genome', null)
+        String organism = sampleData.get('organism', null)
+        Integer binsize = sampleData.get('binsize', null) as Integer
+        if (
+            (organism?.toLowerCase() == 'mus musculus' || genome?.toLowerCase() == 'mm10') &&
+            ![100, 500].contains(binsize)
+        ) {
+            binsize = 100
+        }
         return [
             'strandedness': 'unknown',
             'tag': tag,
-            'organism': sampleData.get('organism', null),
-            'genome': sampleData.get('genome', null),
+            'organism': organism,
+            'genome': genome,
             'sample_type': sampleType,
             'normdup': tag.toLowerCase() == 'copgt-m',
             'nipt': tag.toLowerCase() == 'cfdnaseq',
-            'binsize': sampleData.get('binsize', null),
+            'binsize': binsize,
             'vivar_project': sampleData.get('vivar_project', null),
             'family': sampleData.get('family_number', null),
             'library': sampleData.get('library', null),
