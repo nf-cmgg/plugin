@@ -17,7 +17,7 @@
   tag: WES
   aligner: snap
   sample_type: DNA
-  binsize: 100
+  binsize: 50
   vivar_project: test_project
   family_number: mouse_family
   library: WES_prep
