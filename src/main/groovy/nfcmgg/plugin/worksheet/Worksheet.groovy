@@ -6,7 +6,6 @@ import groovy.util.logging.Slf4j
 import org.yaml.snakeyaml.Yaml
 import java.nio.file.Path
 
-
 /**
  * A class used to define the structure of the worksheet
  */
@@ -25,26 +24,27 @@ class Worksheet {
     Worksheet(Path worksheet) {
         final Map worksheetMap = new Yaml().load(worksheet.text)
         if (worksheetMap.name == null) {
-            error("Worksheet ${worksheet.name} is missing the required 'name' field")
+            log.error("Worksheet ${worksheet.name} is missing the required 'name' field")
         }
         name = worksheetMap.name
         if (worksheetMap.id_field == null) {
-            error("Worksheet ${worksheet.name} is missing the required 'id_field' field")
+            log.error("Worksheet ${worksheet.name} is missing the required 'id_field' field")
         }
         idField = worksheetMap.id_field
         if (worksheetMap.input == null) {
-            error("Worksheet ${worksheet.name} is missing the required 'input' field")
+            log.error("Worksheet ${worksheet.name} is missing the required 'input' field")
         }
         input = new WorksheetInput(worksheetMap.input as Map)
         values = worksheetMap.values != null ? new WorksheetValues(worksheetMap.values as Map) : null
         if (worksheetMap.output == null) {
-            error("Worksheet ${worksheet.name} is missing the required 'output' field")
+            log.error("Worksheet ${worksheet.name} is missing the required 'output' field")
         }
         output = new WorksheetOutput(worksheetMap.output as Map)
-        metrics = worksheetMap.metrics != null ?new WorksheetMetrics(worksheetMap.metrics as Map) : null
+        metrics = worksheetMap.metrics != null ? new WorksheetMetrics(worksheetMap.metrics as Map) : null
         if (worksheetMap.samplesheets == null) {
-            error("Worksheet ${worksheet.name} is missing the required 'samplesheets' field")
+            log.error("Worksheet ${worksheet.name} is missing the required 'samplesheets' field")
         }
         samplesheets = new WorksheetSamplesheets(worksheetMap.samplesheets as List<Map>)
     }
+
 }
