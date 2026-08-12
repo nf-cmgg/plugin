@@ -11,6 +11,8 @@ work
 results
 *.yaml
 *.yml
+!src/main/resources/*.yml
+!src/main/resources/*.yaml
 DONE
 !tests/*/*.yaml
 .nf-test*
