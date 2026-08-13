@@ -8,12 +8,16 @@ import groovy.util.logging.Slf4j
 
 import org.codehaus.groovy.control.CompilationFailedException
 
+import nfcmgg.plugin.utils.SafeGroovy
+
 /**
  * A class used to define which samplesheets should be generated and what their content is
  */
 @CompileStatic
 @Slf4j
 class WorksheetSamplesheets {
+
+    final SamplesheetCreator creator = new SamplesheetCreator()
 
     private static final Pattern DATA_FIELD_PATTERN = Pattern.compile(/data\.([A-Za-z_][A-Za-z0-9_]*)/)
 
@@ -33,6 +37,12 @@ class WorksheetSamplesheets {
         this.samplesheets = parsed.asImmutable()
     }
 
+    void publishSamplesheets(Map<String, OutputEntry> entries, Path location) {
+        samplesheets.each { Samplesheet samplesheet ->
+            samplesheet.publish(entries, location)
+        }
+    }
+
     /**
      * A single samplesheet definition
      */
@@ -42,7 +52,7 @@ class WorksheetSamplesheets {
         final String name
         final String includeFunc
         final String filterFunc
-        final Map<String, Field> fields
+        final List<Field> fields
 
         Samplesheet(Map entry, Set<String> dataFields) {
             if (entry.name == null) {
@@ -61,10 +71,9 @@ class WorksheetSamplesheets {
                 log.error("Samplesheet '${name}' is missing the required 'fields' field")
             }
             final Map fieldsMap = (entry.fields != null ? entry.fields as Map : [:]) as Map
-            final Map<String, Field> parsed = [:]
-            fieldsMap.each { key, value ->
-                final String fieldName = key as String
-                parsed[fieldName] = new Field(fieldName, value)
+            final List<Field> parsed = []
+            fieldsMap.each { String key, Object value ->
+                parsed.add(new Field(key, value))
             }
             fields = parsed.asImmutable()
         }
@@ -87,6 +96,53 @@ class WorksheetSamplesheets {
             }
         }
 
+        void publish(Map<String, OutputEntry> entries, Path location) {
+            if (!name || !fields) {
+                return
+            }
+            List<OutputEntry> filteredEntries = entries
+            if (filterFunc != null) {
+                filteredEntries = entries.findAll { String key, OutputEntry entry ->
+                    Binding binding = new Binding([data: entry])
+                    GroovyShell shell = SafeGroovy.shell(binding)
+                    shell.evaluate(filterFunc) as Boolean
+                }
+            }
+            List<OutputEntry> passedEntries = []
+            List<OutputEntry> failedEntries = []
+            if (includeFunc != null) {
+                filteredEntries.each { String key, OutputEntry entry ->
+                    Binding binding = new Binding([data: entry])
+                    GroovyShell shell = SafeGroovy.shell(binding)
+                    if (shell.evaluate(includeFunc) as Boolean) {
+                        passedEntries.add(entry)
+                    } else {
+                        failedEntries.add(entry)
+                    }
+                }
+            } else {
+                passedEntries = filteredEntries.values()
+            }
+            Path passedSamplesheet = location.resolve(name)
+            Path failedSamplesheet = location.resolve(
+                passedSamplesheet.basename + '_failed' + passedSamplesheet.extension
+            )
+            creator.dump(subsetEntries(passedEntries), passedSamplesheet)
+            creator.dump(subsetEntries(failedEntries), failedSamplesheet)
+        }
+
+    }
+
+    private static List<OutputEntry> subsetEntries(List<OutputEntry> entries) {
+        List<OutputEntry> subset = []
+        entries.each { OutputEntry entry ->
+            Map newStructure = [:]
+            fields.each { Field field ->
+                newStructure[field.key] = entry.get(field.source)
+            }
+            subset.add(new OutputEntry(newStructure))
+        }
+        return subset
     }
 
     /**

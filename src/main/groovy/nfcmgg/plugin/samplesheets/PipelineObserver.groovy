@@ -40,8 +40,6 @@ import nextflow.trace.event.FilePublishEvent
 @CompileStatic
 class PipelineObserver implements TraceObserverV2 {
 
-    final SamplesheetCreator creator = new SamplesheetCreator()
-
     Map<String, OutputEntry> entries = new ConcurrentHashMap<>()
 
     // Location where the samplesheets should be generated
@@ -99,13 +97,18 @@ class PipelineObserver implements TraceObserverV2 {
         }
     }
 
+    @Override
+    void onFlowComplete(Session session) {
+        worksheet.samplesheets.publishSamplesheets(entries)
+    }
+
     /**
      * Override this method to provide default values for samples when they are first encountered
      * @param sample the sample name for which default values should be provided
      * @return a map of key-value pairs to be added to the sample entry when it is first created
      */
     /* groovylint-disable-next-line UnusedMethodParameter */
-    Map<String, Object> getDefaultValuesForSample(String sample) {
+    private Map<String, Object> getDefaultValuesForSample(String sample) {
         Map<String,Object> sampleData = inputData.find { entry -> entry.get(worksheet.idField, '') == sample } ?: [:]
         Map<String, Object> inputMap = worksheet.input.convert(sampleData)
         return worksheet.values.convert(inputMap)
@@ -123,7 +126,7 @@ class PipelineObserver implements TraceObserverV2 {
      * @param basePath the base path for which to get the sample name
      * @return the sample name for the given base path
      */
-    protected String safeGetSampleFromPath(String inputBasePath) {
+    private String safeGetSampleFromPath(String inputBasePath) {
         String basePath = inputBasePath
         // Make sure SNP tracking data will be added to the correct sample
         if (basePath.startsWith('snp_')) {
@@ -153,7 +156,7 @@ class PipelineObserver implements TraceObserverV2 {
         return sample
     }
 
-    protected void addSampleIfMissing(String sample) {
+    private void addSampleIfMissing(String sample) {
         entries.putIfAbsent(
             sample,
             /* groovylint-disable-next-line UnnecessaryCast */
