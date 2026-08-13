@@ -25,8 +25,7 @@ import nextflow.Nextflow
 import nextflow.trace.TraceObserverV2
 import nextflow.trace.TraceObserverFactoryV2
 
-import nfcmgg.plugin.samplesheets.PreprocessingObserver
-import nfcmgg.plugin.samplesheets.RnafusionObserver
+import nfcmgg.plugin.samplesheets.PipelineObserver
 import nfcmgg.plugin.config.CmggConfig
 import nfcmgg.plugin.worksheet.Worksheet
 
