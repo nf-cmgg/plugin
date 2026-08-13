@@ -88,7 +88,7 @@ class PipelineObserver implements TraceObserverV2 {
             entries[sample].append(field.key, targetPath)
         }
 
-        // TODO implement metrics handling
+    // TODO implement metrics handling
     }
 
     /**

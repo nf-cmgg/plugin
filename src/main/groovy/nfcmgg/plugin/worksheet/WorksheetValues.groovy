@@ -8,6 +8,8 @@ import groovy.util.logging.Slf4j
 
 import org.codehaus.groovy.control.CompilationFailedException
 
+import nfcmgg.plugin.utils.SafeGroovy
+
 /**
  * A class used to define extra values to be added to the input data
  */
@@ -38,7 +40,7 @@ class WorksheetValues {
     Map<String, Object> convert(Map<String, Object> inputData) {
         Map<String, Object> convertedData = [:]
         Binding inputBinding = new Binding([input: inputData])
-        GroovyShell inputShell = new GroovyShell(inputBinding)
+        GroovyShell inputShell = SafeGroovy.shell(inputBinding)
         fields.each { key, field ->
             convertedData[key] = field.define(inputShell)
         }
@@ -71,7 +73,7 @@ class WorksheetValues {
         private static boolean validateFunc(String key, String func, Set<String> inputFields) {
             boolean valid = true
             try {
-                new GroovyShell().parse(func)
+                SafeGroovy.parse(func)
             } catch (CompilationFailedException e) {
                 log.error("Invalid Groovy expression in values field '${key}': ${e.message}")
                 valid = false

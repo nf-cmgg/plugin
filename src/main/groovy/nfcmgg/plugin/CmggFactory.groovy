@@ -74,16 +74,16 @@ class CmggFactory implements TraceObserverFactoryV2 {
 
             observers << new PipelineObserver(config.samplesheets.location, worksheet)
 
-            // switch (pipelineName) {
-            //     case 'nf-cmgg/preprocessing':
-            //         observers << new PreprocessingObserver(config.samplesheets.location)
-            //         break
-            //     case 'nf-core/rnafusion':
-            //         observers << new RnafusionObserver(config.samplesheets.location)
-            //         break
-            //     default:
-            //         log.info('No automatic samplesheet generation possible for the current pipeline')
-            // }
+        // switch (pipelineName) {
+        //     case 'nf-cmgg/preprocessing':
+        //         observers << new PreprocessingObserver(config.samplesheets.location)
+        //         break
+        //     case 'nf-core/rnafusion':
+        //         observers << new RnafusionObserver(config.samplesheets.location)
+        //         break
+        //     default:
+        //         log.info('No automatic samplesheet generation possible for the current pipeline')
+        // }
         }
         return observers
     }
