@@ -35,7 +35,9 @@ class Worksheet {
             log.error("Worksheet ${worksheet.name} is missing the required 'input' field")
         }
         input = new WorksheetInput(worksheetMap.input as Map)
-        values = worksheetMap.values != null ? new WorksheetValues(worksheetMap.values as Map) : null
+        values = worksheetMap.values != null ? new WorksheetValues(
+            worksheetMap.values as Map, input.fields.keySet()
+        ) : null
         if (worksheetMap.output == null) {
             log.error("Worksheet ${worksheet.name} is missing the required 'output' field")
         }
