@@ -1,7 +1,7 @@
 # Define the name of the pipeline. This will be checked against the manifest.name in the config file.
 name: nf-cmgg/preprocessing
 # Define which field of the input block should be used as the common identifier for the sample
-id_field: sample
+id_field: samplename
 # Define the expected fields of the input samplesheet.
 # Key-value pairs should be used here where the key is the name used by the plugin
 # and the value is the name in the samplesheet. Leave the value empty

@@ -21,6 +21,7 @@ import static nfcmgg.plugin.utils.SessionFetcher.getInputSamplesheetList
 
 import nfcmgg.plugin.worksheet.Worksheet
 import nfcmgg.plugin.worksheet.WorksheetOutput
+import nfcmgg.plugin.worksheet.WorksheetMetrics
 
 import groovy.util.logging.Slf4j
 import groovy.transform.CompileStatic
@@ -84,11 +85,18 @@ class PipelineObserver implements TraceObserverV2 {
 
         WorksheetOutput.Field field = worksheet.output.matchingField(targetName)
         if (field) {
-            String sample = safeGetSample(targetPath)
+            String sample = safeGetSampleFromPath(targetPath)
             entries[sample].append(field.key, targetPath)
         }
 
-    // TODO implement metrics handling
+        List<WorksheetMetrics.Field> metrics = worksheet.metrics.matchingFields(targetName)
+        metrics.each { metric ->
+            Map<String, Object> metricData = metric.convert(targetPath)
+            metricData.each { String sample, Object value ->
+                addSampleIfMissing(sample)
+                entries[sample].append(metric.key, value)
+            }
+        }
     }
 
     /**
@@ -115,7 +123,7 @@ class PipelineObserver implements TraceObserverV2 {
      * @param basePath the base path for which to get the sample name
      * @return the sample name for the given base path
      */
-    protected String safeGetSample(String inputBasePath) {
+    protected String safeGetSampleFromPath(String inputBasePath) {
         String basePath = inputBasePath
         // Make sure SNP tracking data will be added to the correct sample
         if (basePath.startsWith('snp_')) {
@@ -141,12 +149,16 @@ class PipelineObserver implements TraceObserverV2 {
                     "Multiple possible samples found for path '$basePath': $possibleSamples, using '$sample' as sample name, because it is the longest match"
                 )
         }
+        addSampleIfMissing(sample)
+        return sample
+    }
+
+    protected void addSampleIfMissing(String sample) {
         entries.putIfAbsent(
             sample,
             /* groovylint-disable-next-line UnnecessaryCast */
             new OutputEntry(['id': sample] as Map<String, Object> + getDefaultValuesForSample(sample))
         )
-        return sample
     }
 
 }
