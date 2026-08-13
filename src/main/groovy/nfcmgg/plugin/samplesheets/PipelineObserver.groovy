@@ -92,7 +92,7 @@ class PipelineObserver implements TraceObserverV2 {
             Map<String, Object> metricData = metric.convert(targetPath)
             metricData.each { String sample, Object value ->
                 addSampleIfMissing(sample)
-                entries[sample].append(metric.key, value)
+                entries[sample].add(metric.key, value)
             }
         }
     }

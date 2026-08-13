@@ -42,6 +42,7 @@ class WorksheetSamplesheets {
 
     void publishSamplesheets(Map<String, OutputEntry> entries, Path location) {
         samplesheets.each { Samplesheet samplesheet ->
+            log.info("Publishing samplesheet '${samplesheet.name}'")
             samplesheet.publish(entries, location, creator)
         }
     }
@@ -87,20 +88,21 @@ class WorksheetSamplesheets {
                 return
             }
             Map<String, OutputEntry> filteredEntries = entries
-            if (filterFunc != null) {
+            if (includeFunc != null) {
                 filteredEntries = entries.findAll { String key, OutputEntry entry ->
                     Binding binding = new Binding([data: entry])
                     GroovyShell shell = SafeGroovy.shell(binding)
-                    shell.evaluate(filterFunc) as Boolean
+                    shell.evaluate(includeFunc) as Boolean
                 }
             }
             List<OutputEntry> passedEntries = []
             List<OutputEntry> failedEntries = []
-            if (includeFunc != null) {
+            if (filterFunc != null) {
                 filteredEntries.each { String key, OutputEntry entry ->
+                    log.info("Entry '${key}' yield: ${entry.get('yield')}")
                     Binding binding = new Binding([data: entry])
                     GroovyShell shell = SafeGroovy.shell(binding)
-                    if (shell.evaluate(includeFunc) as Boolean) {
+                    if (shell.evaluate(filterFunc) as Boolean) {
                         passedEntries.add(entry)
                     } else {
                         failedEntries.add(entry)
@@ -111,7 +113,7 @@ class WorksheetSamplesheets {
             }
             Path passedSamplesheet = location.resolve(name)
             Path failedSamplesheet = location.resolve(
-                (passedSamplesheet.baseName + '_failed' + passedSamplesheet.extension) as String
+                (passedSamplesheet.baseName + '_failed.' + passedSamplesheet.extension) as String
             )
             creator.dump(subsetEntries(passedEntries), passedSamplesheet)
             creator.dump(subsetEntries(failedEntries), failedSamplesheet)
