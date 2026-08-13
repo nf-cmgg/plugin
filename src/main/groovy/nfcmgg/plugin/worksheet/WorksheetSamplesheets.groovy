@@ -117,7 +117,19 @@ class WorksheetSamplesheets {
             creator.dump(subsetEntries(failedEntries), failedSamplesheet)
         }
 
-        private static void validateFunc(String name, String funcName, String func, Set<String> dataFields) {
+        private List<OutputEntry> subsetEntries(List<OutputEntry> entries) {
+            List<OutputEntry> subset = []
+            entries.each { OutputEntry entry ->
+                Map<String, Object> newStructure = [:]
+                fields.each { Field field ->
+                    newStructure[field.key] = entry.get(field.source)
+                }
+                subset.add(new OutputEntry(newStructure))
+            }
+            return subset
+        }
+
+        private void validateFunc(String name, String funcName, String func, Set<String> dataFields) {
             try {
                 new GroovyShell().parse(func)
             } catch (CompilationFailedException e) {
@@ -135,18 +147,6 @@ class WorksheetSamplesheets {
             }
         }
 
-    }
-
-    private static List<OutputEntry> subsetEntries(List<OutputEntry> entries) {
-        List<OutputEntry> subset = []
-        entries.each { OutputEntry entry ->
-            Map<String, Object> newStructure = [:]
-            fields.each { Field field ->
-                newStructure[field.key] = entry.get(field.source)
-            }
-            subset.add(new OutputEntry(newStructure))
-        }
-        return subset
     }
 
     /**
