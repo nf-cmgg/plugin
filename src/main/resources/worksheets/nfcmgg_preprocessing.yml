@@ -47,7 +47,6 @@ values:
       && ![100, 500].contains(input.binsize) ? 100 : input.binsize
   exomecnv_batch:
     func: 'input.library + "_" + input.sex'
-  yield: -1
 # Define which output files that should be remembered for samplesheet generation.
 # Key-value pairs should be used here where the key is the name used by the plugin
 # All fields can take the following key-value pairs:

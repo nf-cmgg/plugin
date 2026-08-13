@@ -15,15 +15,19 @@
  */
 package nfcmgg.plugin
 
+import java.nio.file.Path
+
 import groovy.util.logging.Slf4j
 import groovy.transform.CompileStatic
 import nextflow.Session
+import nextflow.Nextflow
 import nextflow.trace.TraceObserverV2
 import nextflow.trace.TraceObserverFactoryV2
 
 import nfcmgg.plugin.samplesheets.PreprocessingObserver
 import nfcmgg.plugin.samplesheets.RnafusionObserver
 import nfcmgg.plugin.config.CmggConfig
+import nfcmgg.plugin.worksheet.Worksheet
 
 /**
  * Implements a factory object required to create
@@ -52,6 +56,21 @@ class CmggFactory implements TraceObserverFactoryV2 {
             }
 
             log.info("Detected pipeline name: '${pipelineName}', checking for automatic samplesheet generation")
+
+            Worksheet worksheet
+            ((Path) Nextflow.file(getClass().getResource('/worksheets').toURI().toString())).eachFile { res ->
+                if (['yml', 'yaml'].contains(res.extension) && !worksheet) {
+                    Worksheet worksheetTmp = new Worksheet(res)
+                    if (worksheetTmp.name == pipelineName) {
+                        worksheet = worksheetTmp
+                    }
+                }
+            }
+
+            if (!worksheet) {
+                log.info('No worksheet found for the current pipeline, skipping automatic samplesheet generation')
+                return observers
+            }
 
             switch (pipelineName) {
                 case 'nf-cmgg/preprocessing':
