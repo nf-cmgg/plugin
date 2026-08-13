@@ -46,7 +46,16 @@ class Worksheet {
         if (worksheetMap.samplesheets == null) {
             log.error("Worksheet ${worksheet.name} is missing the required 'samplesheets' field")
         }
-        samplesheets = new WorksheetSamplesheets(worksheetMap.samplesheets as List<Map>)
+        final Set<String> dataFields = [] as Set
+        dataFields.addAll(input.fields.keySet())
+        if (values != null) {
+            dataFields.addAll(values.fields.keySet())
+        }
+        dataFields.addAll(output.fields.keySet())
+        if (metrics != null) {
+            dataFields.addAll(metrics.fields.keySet())
+        }
+        samplesheets = new WorksheetSamplesheets(worksheetMap.samplesheets as List<Map>, dataFields)
     }
 
 }
