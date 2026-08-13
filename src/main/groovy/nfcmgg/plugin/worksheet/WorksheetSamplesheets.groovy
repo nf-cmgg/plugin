@@ -2,6 +2,7 @@ package nfcmgg.plugin.worksheet
 
 import java.util.regex.Matcher
 import java.util.regex.Pattern
+import java.nio.file.Path
 
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
@@ -9,6 +10,8 @@ import groovy.util.logging.Slf4j
 import org.codehaus.groovy.control.CompilationFailedException
 
 import nfcmgg.plugin.utils.SafeGroovy
+import nfcmgg.plugin.samplesheets.OutputEntry
+import nfcmgg.plugin.samplesheets.SamplesheetCreator
 
 /**
  * A class used to define which samplesheets should be generated and what their content is
@@ -17,9 +20,9 @@ import nfcmgg.plugin.utils.SafeGroovy
 @Slf4j
 class WorksheetSamplesheets {
 
-    final SamplesheetCreator creator = new SamplesheetCreator()
-
     private static final Pattern DATA_FIELD_PATTERN = Pattern.compile(/data\.([A-Za-z_][A-Za-z0-9_]*)/)
+
+    final SamplesheetCreator creator = new SamplesheetCreator()
 
     /**
      * Samplesheet definitions in declaration order
@@ -39,7 +42,7 @@ class WorksheetSamplesheets {
 
     void publishSamplesheets(Map<String, OutputEntry> entries, Path location) {
         samplesheets.each { Samplesheet samplesheet ->
-            samplesheet.publish(entries, location)
+            samplesheet.publish(entries, location, creator)
         }
     }
 
@@ -70,37 +73,20 @@ class WorksheetSamplesheets {
             if (entry.fields == null) {
                 log.error("Samplesheet '${name}' is missing the required 'fields' field")
             }
-            final Map fieldsMap = (entry.fields != null ? entry.fields as Map : [:]) as Map
-            final List<Field> parsed = []
-            fieldsMap.each { String key, Object value ->
-                parsed.add(new Field(key, value))
+            final Map<String, Object> fieldsMap = (
+                entry.fields != null ? entry.fields as Map : [:]
+            ) as Map<String, Object>
+            final List<Field> parsed = fieldsMap.collect { String key, Object value ->
+                return new Field(key.toString(), value)
             }
             fields = parsed.asImmutable()
         }
 
-        private static void validateFunc(String name, String funcName, String func, Set<String> dataFields) {
-            try {
-                new GroovyShell().parse(func)
-            } catch (CompilationFailedException e) {
-                log.error("Invalid Groovy expression in samplesheet '${name}' ${funcName}: ${e.message}")
-            }
-            final Matcher matcher = DATA_FIELD_PATTERN.matcher(func)
-            while (matcher.find()) {
-                final String referenced = matcher.group(1)
-                if (!dataFields.contains(referenced)) {
-                    log.error(
-                        "Samplesheet '${name}' ${funcName} references unknown data field 'data.${referenced}'. " +
-                        "Available data fields: ${dataFields.sort().join(', ')}"
-                    )
-                }
-            }
-        }
-
-        void publish(Map<String, OutputEntry> entries, Path location) {
+        void publish(Map<String, OutputEntry> entries, Path location, SamplesheetCreator creator) {
             if (!name || !fields) {
                 return
             }
-            List<OutputEntry> filteredEntries = entries
+            Map<String, OutputEntry> filteredEntries = entries
             if (filterFunc != null) {
                 filteredEntries = entries.findAll { String key, OutputEntry entry ->
                     Binding binding = new Binding([data: entry])
@@ -121,14 +107,32 @@ class WorksheetSamplesheets {
                     }
                 }
             } else {
-                passedEntries = filteredEntries.values()
+                passedEntries = filteredEntries.values().toList()
             }
             Path passedSamplesheet = location.resolve(name)
             Path failedSamplesheet = location.resolve(
-                passedSamplesheet.basename + '_failed' + passedSamplesheet.extension
+                (passedSamplesheet.baseName + '_failed' + passedSamplesheet.extension) as String
             )
             creator.dump(subsetEntries(passedEntries), passedSamplesheet)
             creator.dump(subsetEntries(failedEntries), failedSamplesheet)
+        }
+
+        private static void validateFunc(String name, String funcName, String func, Set<String> dataFields) {
+            try {
+                new GroovyShell().parse(func)
+            } catch (CompilationFailedException e) {
+                log.error("Invalid Groovy expression in samplesheet '${name}' ${funcName}: ${e.message}")
+            }
+            final Matcher matcher = DATA_FIELD_PATTERN.matcher(func)
+            while (matcher.find()) {
+                final String referenced = matcher.group(1)
+                if (!dataFields.contains(referenced)) {
+                    log.error(
+                        "Samplesheet '${name}' ${funcName} references unknown data field 'data.${referenced}'. " +
+                        "Available data fields: ${dataFields.sort().join(', ')}"
+                    )
+                }
+            }
         }
 
     }
@@ -136,7 +140,7 @@ class WorksheetSamplesheets {
     private static List<OutputEntry> subsetEntries(List<OutputEntry> entries) {
         List<OutputEntry> subset = []
         entries.each { OutputEntry entry ->
-            Map newStructure = [:]
+            Map<String, Object> newStructure = [:]
             fields.each { Field field ->
                 newStructure[field.key] = entry.get(field.source)
             }
