@@ -29,6 +29,19 @@ class WorksheetInput {
     }
 
     /**
+     * Convert the input data to the expected format
+     * @param inputData the input data to convert
+     * @return the converted data
+     */
+    Map<String, Object> convert(Map<String, Object> inputData) {
+        Map<String, Object> convertedData = [:]
+        fields.each { key, field ->
+            convertedData[key] = field.convert(inputData.get(field.name, null))
+        }
+        return convertedData
+    }
+
+    /**
      * A single input field definition
      */
     @CompileStatic
@@ -50,6 +63,28 @@ class WorksheetInput {
                 )
             }
             type = fieldType
+        }
+
+        /**
+         * Convert the input value to the expected format
+         * @param value the input value to convert
+         * @return the converted value
+         */
+        Object convert(Object value) {
+            if (value == null) {
+                return defaultValue
+            }
+            switch (type) {
+                case 'string':
+                    return value.toString()
+                case 'integer':
+                    return value.toString().toInteger()
+                case 'float':
+                    return value.toString().toFloat()
+                case 'boolean':
+                    return value.toString().toBoolean()
+            }
+            return value.toString()
         }
 
     }

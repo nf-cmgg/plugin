@@ -30,7 +30,7 @@ input:
 # Define extra values to be added to the input data, possibly based on other input data
 # This can also be used to overwrite values from the samplesheet if necessary
 # - description: A description of the field. (this is not used by the plugin)
-# - value: A fixed value to be added to the input data
+# - value: A fixed value to be added to the input data, if missing
 # - func: A function to be called to generate the value. 
 #         The function will be called with the input data as the argument. 
 #         Use input.<field> to access a specific field

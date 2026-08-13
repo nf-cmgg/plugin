@@ -28,6 +28,10 @@ class WorksheetOutput {
         fields = parsed.asImmutable()
     }
 
+    Field matchingField(String targetName) {
+        return fields.values().find { field -> targetName.matches(field.pattern) }
+    }
+
     /**
      * A single output field definition
      */

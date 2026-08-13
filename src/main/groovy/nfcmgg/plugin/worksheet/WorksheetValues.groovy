@@ -35,6 +35,16 @@ class WorksheetValues {
         fields = parsed.asImmutable()
     }
 
+    Map<String, Object> convert(Map<String, Object> inputData) {
+        Map<String, Object> convertedData = [:]
+        Binding inputBinding = new Binding([input: inputData])
+        GroovyShell inputShell = new GroovyShell(inputBinding)
+        fields.each { key, field ->
+            convertedData[key] = field.define(inputShell)
+        }
+        return convertedData
+    }
+
     /**
      * A single value field definition
      */
@@ -49,16 +59,22 @@ class WorksheetValues {
             this.key = key
             value = fieldMap.containsKey('value') ? fieldMap.value : null
             func = fieldMap.func != null ? fieldMap.func as String : null
-            if (func != null) {
-                validateFunc(key, func, inputFields)
+            if (func != null && !validateFunc(key, func, inputFields)) {
+                func = null
             }
         }
 
-        private static void validateFunc(String key, String func, Set<String> inputFields) {
+        Object define(GroovyShell shell) {
+            return value != null ? value : shell.evaluate(func)
+        }
+
+        private static boolean validateFunc(String key, String func, Set<String> inputFields) {
+            boolean valid = true
             try {
                 new GroovyShell().parse(func)
             } catch (CompilationFailedException e) {
                 log.error("Invalid Groovy expression in values field '${key}': ${e.message}")
+                valid = false
             }
             final Matcher matcher = INPUT_FIELD_PATTERN.matcher(func)
             while (matcher.find()) {
@@ -68,8 +84,10 @@ class WorksheetValues {
                         "Values field '${key}' references unknown input field 'input.${referenced}'. " +
                         "Available input fields: ${inputFields.sort().join(', ')}"
                     )
+                    valid = false
                 }
             }
+            return valid
         }
 
     }
