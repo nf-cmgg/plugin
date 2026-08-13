@@ -15,6 +15,7 @@
  */
 package nfcmgg.plugin
 
+import org.yaml.snakeyaml.Yaml
 import java.nio.file.Path
 
 import groovy.util.logging.Slf4j
@@ -59,10 +60,10 @@ class CmggFactory implements TraceObserverFactoryV2 {
 
             Worksheet worksheet
             ((Path) Nextflow.file(getClass().getResource('/worksheets').toURI().toString())).eachFile { res ->
-                if (['yml', 'yaml'].contains(res.extension) && !worksheet) {
-                    Worksheet worksheetTmp = new Worksheet(res)
-                    if (worksheetTmp.name == pipelineName) {
-                        worksheet = worksheetTmp
+                if (['yml', 'yaml'].contains(res.extension)) {
+                    String worksheetPipelineName = ((Map)new Yaml().load(res.text)).get('name', '')
+                    if (worksheetPipelineName == pipelineName) {
+                        worksheet = new Worksheet(res)
                     }
                 }
             }
