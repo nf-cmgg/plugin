@@ -38,7 +38,7 @@ class WorksheetValues {
     }
 
     Map<String, Object> convert(Map<String, Object> inputData) {
-        Map<String, Object> convertedData = [:]
+        Map<String, Object> convertedData = inputData
         Binding inputBinding = new Binding([input: inputData])
         GroovyShell inputShell = SafeGroovy.shell(inputBinding)
         fields.each { key, field ->
