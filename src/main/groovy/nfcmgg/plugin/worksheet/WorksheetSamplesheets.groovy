@@ -87,9 +87,10 @@ class WorksheetSamplesheets {
             if (!name || !fields) {
                 return
             }
-            List<OutputEntry> filteredEntries = entries.values().toList()
+            Map<String, OutputEntry> sortedEntries = entries.sort { entry -> entry.key }
+            List<OutputEntry> filteredEntries = sortedEntries.values().toList()
             if (includeFunc != null) {
-                filteredEntries = entries.findAll { String key, OutputEntry entry ->
+                filteredEntries = sortedEntries.findAll { String key, OutputEntry entry ->
                     Binding binding = new Binding([data: entry])
                     GroovyShell shell = SafeGroovy.shell(binding)
                     shell.evaluate(includeFunc) as Boolean
