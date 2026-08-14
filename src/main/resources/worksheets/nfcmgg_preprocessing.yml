@@ -94,8 +94,9 @@ metrics:
 #                should be included in the samplesheet. Use the `data.<name>` variable to access any above defined field.
 #                All samples that do not pass this filter will be added to a samplesheet that has the `_failed` suffix.
 # - fields: Key-value pairs where the key is the name used in the resulting samplesheet 
-#           and the value is the name of the data value provided in the above blocks.
-#           If the field name is the same as the key, the value can be omitted.
+#           and the value is a map with optional keys: 
+#           - source: The name of the data value provided in the above blocks. Will use the key if not provided.
+#           - type: The type of the field. Can be one of the following: string, integer, float, boolean. Defaults to the type of the data
 samplesheets:
   - name: nfcmgg_sampletracking_samplesheet.yaml
     description: The samplesheet for the nf-cmgg/sampletracking pipeline
@@ -105,11 +106,16 @@ samplesheets:
       && data.tag?.toLowerCase() in ['wes', 'wgs']
     fields:
       sample:
-      pool: library
-      sample_bam: cram
-      sample_bam_index: crai
-      snp_bam: snp_cram
-      snp_bam_index: snp_crai
+      pool: 
+        source: library
+      sample_bam: 
+        source: cram
+      sample_bam_index: 
+        source: crai
+      snp_bam: 
+        source: snp_cram
+      snp_bam_index: 
+        source: snp_crai
       sex:
   - name: nfcore_rnafusion_samplesheet.yaml
     description: The samplesheet for the nfcore/rnafusion pipeline
@@ -125,7 +131,8 @@ samplesheets:
       fastq_1:
       fastq_2:
       strandedness:
-      reads: yield
+      reads: 
+        source: yield
   - name: nfcmgg_vivar_samplesheet.yaml
     description: The samplesheet for the nf-cmgg/vivar pipeline
     include_func: |
@@ -142,12 +149,17 @@ samplesheets:
       organism:
       tag:
       binsize:
-      project: vivar_project
+        type: integer
+      project: 
+        source: vivar_project
       normdup:
       nipt:
-      proband: family_number
-      reads: cram
-      reads_index: crai
+      proband: 
+        source: family_number
+      reads: 
+        source: cram
+      reads_index: 
+        source: crai
   - name: nfcmgg_exomecnv_samplesheet.yaml
     description: The samplesheet for the nf-cmgg/exomecnv pipeline
     include_func: |
@@ -157,11 +169,14 @@ samplesheets:
     fields:
       sample:
       family:
-      batch: exomecnv_batch
+      batch: 
+        source: exomecnv_batch
       cram:
       crai:
-      bed: per_base_bed
-      bed_index: per_base_bed_index
+      bed: 
+        source: per_base_bed
+      bed_index: 
+        source: per_base_bed_index
   - name: nfcmgg_smallvariants_samplesheet.yaml
     description: The samplesheet for the nf-cmgg/smallvariants pipeline
     include_func: |

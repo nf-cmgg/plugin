@@ -74,10 +74,10 @@ class WorksheetSamplesheets {
             if (entry.fields == null) {
                 log.error("Samplesheet '${name}' is missing the required 'fields' field")
             }
-            final Map<String, Object> fieldsMap = (
+            final Map<String, Map> fieldsMap = (
                 entry.fields != null ? entry.fields as Map : [:]
-            ) as Map<String, Object>
-            final List<Field> parsed = fieldsMap.collect { String key, Object value ->
+            ) as Map<String, Map>
+            final List<Field> parsed = fieldsMap.collect { String key, Map value ->
                 return new Field(key.toString(), value)
             }
             fields = parsed.asImmutable()
@@ -159,7 +159,7 @@ class WorksheetSamplesheets {
                 Map<String, Object> newStructure = [:]
                 fields.each { Field field ->
                     if (entry.get(field.source) != null) {
-                        newStructure[field.key] = entry.get(field.source)
+                        newStructure[field.key] = field.convert(entry)
                     }
                 }
                 subset.add(new OutputEntry(newStructure))
@@ -195,11 +195,32 @@ class WorksheetSamplesheets {
 
         final String key
         final String source
+        final String type
 
-        Field(String key, Object fieldValue) {
+        Field(String key, Map<String, Object> fieldValue) {
             this.key = key
             // If the value is omitted, the data field name matches the key
-            source = fieldValue != null ? fieldValue as String : key
+            source = fieldValue != null ? fieldValue.source as String : key
+            type = fieldValue != null ? fieldValue.type as String : ''
+        }
+
+        Object convert(OutputEntry entry) {
+            Object value = entry.get(source)
+            if (value != null) {
+                if (type == 'integer') {
+                    return value as Integer
+                }
+                if (type == 'float') {
+                    return value as Double
+                }
+                if (type == 'boolean') {
+                    return value as Boolean
+                }
+                if (type == 'string') {
+                    return value as String
+                }
+            }
+            return value
         }
 
     }
