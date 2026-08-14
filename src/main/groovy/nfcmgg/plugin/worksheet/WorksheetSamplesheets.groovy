@@ -87,18 +87,52 @@ class WorksheetSamplesheets {
             if (!name || !fields) {
                 return
             }
-            Map<String, OutputEntry> filteredEntries = entries
+            List<OutputEntry> filteredEntries = entries.values().toList()
             if (includeFunc != null) {
                 filteredEntries = entries.findAll { String key, OutputEntry entry ->
                     Binding binding = new Binding([data: entry])
                     GroovyShell shell = SafeGroovy.shell(binding)
                     shell.evaluate(includeFunc) as Boolean
-                }
+                }.values().toList()
             }
+
+            List<OutputEntry> transposedEntries = filteredEntries.collectMany { OutputEntry entry ->
+                List<Map<String, Object>> multiValues = []
+                Map<String, Object> values = entry.values
+                    .collectEntries { String key, Object value ->
+                        Object realValue = value
+                        if (value in List) {
+                            List<Object> listValue = value as List<Object>
+                            if (listValue.size() > 1) {
+                                listValue.sort()
+                                listValue.eachWithIndex { Object listValueItem, int index ->
+                                    /* groovylint-disable-next-line NestedBlockDepth */
+                                    if (multiValues.size() <= index) {
+                                        multiValues.add([:])
+                                    }
+                                    multiValues[index] += [(key.toString()): listValueItem]
+                                }
+                                return null
+                            }
+                            realValue = listValue.first()
+                        }
+                        return [key, realValue]
+                    }
+                List<OutputEntry> finalEntries = []
+                if (multiValues.size() > 0) {
+                    multiValues.each { Map<String, Object> multiValue ->
+                        finalEntries.add(new OutputEntry(values + multiValue))
+                    }
+                } else {
+                    finalEntries.add(new OutputEntry(values))
+                }
+                return finalEntries
+            } as List<OutputEntry>
+
             List<OutputEntry> passedEntries = []
             List<OutputEntry> failedEntries = []
             if (filterFunc != null) {
-                filteredEntries.each { String key, OutputEntry entry ->
+                transposedEntries.each { OutputEntry entry ->
                     Binding binding = new Binding([data: entry])
                     GroovyShell shell = SafeGroovy.shell(binding)
                     if (shell.evaluate(filterFunc) as Boolean) {
@@ -108,7 +142,7 @@ class WorksheetSamplesheets {
                     }
                 }
             } else {
-                passedEntries = filteredEntries.values().toList()
+                passedEntries = transposedEntries
             }
             Path passedSamplesheet = location.resolve(name)
             Path failedSamplesheet = location.resolve(
