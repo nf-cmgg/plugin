@@ -157,7 +157,9 @@ class WorksheetSamplesheets {
             entries.each { OutputEntry entry ->
                 Map<String, Object> newStructure = [:]
                 fields.each { Field field ->
-                    newStructure[field.key] = entry.get(field.source)
+                    if (entry.get(field.source)) {
+                        newStructure[field.key] = entry.get(field.source)
+                    }
                 }
                 subset.add(new OutputEntry(newStructure))
             }
