@@ -38,9 +38,9 @@ values:
   strandedness:
     value: unknown
   normdup:
-    func: 'input.tag.toLowerCase() == "copgt-m"'
+    func: input.tag.toLowerCase() == "copgt-m"
   nipt:
-    func: 'input.tag.toLowerCase() == "cfdnaseq"'
+    func: input.tag.toLowerCase() == "cfdnaseq"
   binsize: 
     func: |
       (input.organism?.toLowerCase() == 'mus musculus' || input.genome?.toLowerCase() == 'mm10')
@@ -104,12 +104,12 @@ samplesheets:
       && data.sample_type?.toLowerCase() == 'dna'
       && data.tag?.toLowerCase() in ['wes', 'wgs']
     fields:
-      id: sample
-      library: pool
-      cram: sample_bam
-      crai: sample_bam_index
-      snp_cram: snp_bam
-      snp_crai: snp_bam_index
+      sample:
+      pool: library
+      sample_bam: cram
+      sample_bam_index: crai
+      snp_bam: snp_cram
+      snp_bam_index: snp_crai
       sex:
   - name: nfcore_rnafusion_samplesheet.yaml
     description: The samplesheet for the nfcore/rnafusion pipeline
@@ -121,7 +121,7 @@ samplesheets:
     filter_func: |
       data.yield.toLong() >= 1000000L
     fields:
-      id: sample
+      sample:
       fastq_1:
       fastq_2:
       strandedness:
@@ -138,7 +138,7 @@ samplesheets:
       && data.sample_type?.toLowerCase() in ['dna', 'tissue']
       && !data.id?.startsWith('mtD')
     fields:
-      id: sample
+      id:
       organism:
       tag:
       binsize:
@@ -153,11 +153,11 @@ samplesheets:
     include_func: |
       (data.organism?.toLowerCase() == 'homo sapiens' || data.genome?.toLowerCase() == 'grch38')
       && data.sample_type?.toLowerCase() == 'dna'
-      && data.tag?.toLowerCase() in ['wes', 'wgs']
+      && data.tag?.toLowerCase() in ['wes']
     fields:
-      id: sample
-      batch: exomecnv_batch
+      sample:
       family:
+      batch: exomecnv_batch
       cram:
       crai:
       bed: per_base_bed
@@ -169,7 +169,7 @@ samplesheets:
       && data.sample_type?.toLowerCase() == 'dna'
       && data.tag?.toLowerCase() in ['wes', 'wgs']
     fields:
-      id: sample
+      sample:
       family:
       cram:
       crai:
