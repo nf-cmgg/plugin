@@ -99,7 +99,6 @@ class WorksheetSamplesheets {
             List<OutputEntry> failedEntries = []
             if (filterFunc != null) {
                 filteredEntries.each { String key, OutputEntry entry ->
-                    log.info("Entry '${key}' yield: ${entry.get('yield')}")
                     Binding binding = new Binding([data: entry])
                     GroovyShell shell = SafeGroovy.shell(binding)
                     if (shell.evaluate(filterFunc) as Boolean) {

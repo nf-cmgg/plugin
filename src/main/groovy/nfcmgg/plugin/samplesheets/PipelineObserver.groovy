@@ -83,7 +83,7 @@ class PipelineObserver implements TraceObserverV2 {
 
         WorksheetOutput.Field field = worksheet.output.matchingField(targetName)
         if (field) {
-            String sample = safeGetSampleFromPath(targetPath)
+            String sample = safeGetSampleFromPath(targetName)
             entries[sample].append(field.key, targetPath)
         }
 
