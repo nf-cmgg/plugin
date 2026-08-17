@@ -200,23 +200,21 @@ class WorksheetSamplesheets {
         Field(String key, Map<String, Object> fieldValue) {
             this.key = key
             // If the value is omitted, the data field name matches the key
-            source = fieldValue != null ? fieldValue.source as String : key
-            type = fieldValue != null ? fieldValue.type as String : ''
+            source = fieldValue?.get('source')?.toString() ?: key
+            type = fieldValue?.get('type')?.toString() ?: ''
         }
 
         Object convert(OutputEntry entry) {
             Object value = entry.get(source)
-            if (value != null) {
-                if (type == 'integer') {
+            if (value != null && type != '') {
+                switch (type) {
+                case 'integer':
                     return value as Integer
-                }
-                if (type == 'float') {
-                    return value as Double
-                }
-                if (type == 'boolean') {
+                case 'float':
+                    return value as Float
+                case 'boolean':
                     return value as Boolean
-                }
-                if (type == 'string') {
+                case 'string':
                     return value as String
                 }
             }

@@ -23,7 +23,7 @@ input:
     default: DNA
   binsize:
   vivar_project:
-  family:
+  family_number:
   library:
   sex:
     default: U
@@ -154,8 +154,6 @@ samplesheets:
         source: vivar_project
       normdup:
       nipt:
-      proband: 
-        source: family_number
       reads: 
         source: cram
       reads_index: 
@@ -168,9 +166,10 @@ samplesheets:
       && data.tag?.toLowerCase() in ['wes']
     fields:
       sample:
-      family:
       batch: 
         source: exomecnv_batch
+      family:
+        source: family_number
       cram:
       crai:
       bed: 
