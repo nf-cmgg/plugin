@@ -27,14 +27,20 @@ class Worksheet {
             log.error("Worksheet ${worksheet.name} is missing the required 'name' field")
         }
         name = worksheetMap.name
-        if (worksheetMap.id_field == null) {
-            log.error("Worksheet ${worksheet.name} is missing the required 'id_field' field")
-        }
-        idField = worksheetMap.id_field
         if (worksheetMap.input == null) {
             log.error("Worksheet ${worksheet.name} is missing the required 'input' field")
         }
         input = new WorksheetInput(worksheetMap.input as Map)
+        if (worksheetMap.id_field == null) {
+            log.error("Worksheet ${worksheet.name} is missing the required 'id_field' field")
+        }
+        else if (!input.hasSource(worksheetMap.id_field.toString())) {
+            log.error(
+                "Worksheet ${worksheet.name} 'id_field' '${worksheetMap.id_field}' is not defined" +
+                ' as a source or key (when source is missing) in the input block'
+            )
+        }
+        idField = worksheetMap.id_field
         values = worksheetMap.values != null ? new WorksheetValues(
             worksheetMap.values as Map, input.fields.keySet()
         ) : null

@@ -36,9 +36,13 @@ class WorksheetInput {
     Map<String, Object> convert(Map<String, Object> inputData) {
         Map<String, Object> convertedData = [:]
         fields.each { key, field ->
-            convertedData[key] = field.convert(inputData.get(field.name, null))
+            convertedData[key] = field.convert(inputData.get(field.source, null))
         }
         return convertedData
+    }
+
+    Boolean hasSource(String source) {
+        return fields.any { key, field -> field.source == source }
     }
 
     /**
@@ -48,14 +52,14 @@ class WorksheetInput {
     static class Field {
 
         final String key
-        final String name
+        final String source
         final String type
         final Object defaultValue
 
         Field(String key, Map fieldMap) {
             this.key = key
             defaultValue = fieldMap.containsKey('default') ? fieldMap.default : null
-            name = fieldMap.name != null ? fieldMap.name as String : key
+            source = fieldMap.source != null ? fieldMap.source as String : key
             final String fieldType = fieldMap.type != null ? fieldMap.type as String : 'string'
             if (!(fieldType in ['string', 'integer', 'float', 'boolean'])) {
                 log.error(

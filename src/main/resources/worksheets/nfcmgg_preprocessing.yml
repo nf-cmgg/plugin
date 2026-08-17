@@ -9,12 +9,12 @@ id_field: samplename
 # All fields can take the following key-value pairs:
 # - description: A description of the field. (this is not used by the plugin)
 # - default: A default value for the field, the default value will be set to `null` if missing
-# - name: The name of the field in the original samplesheet. If not provided, the key will be used.
+# - source: The name of the field in the original samplesheet. If not provided, the key will be used.
 # - type: The type of the field. Can be one of the following: string (default), integer, float, boolean.
 input:
   id:
   sample:
-    name: samplename
+    source: samplename
   tag:
     default: ''
   organism:
