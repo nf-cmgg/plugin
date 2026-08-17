@@ -18,6 +18,10 @@
                     "  bed: mtD123456.per-base.bed.gz",
                     "  bed_index: mtD123456.per-base.bed.gz.csi"
                 ],
+                "nfcmgg_exomecnv_samplesheet_failed.yaml": [
+                    "[",
+                    "  ]"
+                ],
                 "nfcmgg_sampletracking_samplesheet.yaml": [
                     "- sample: D123456WES",
                     "  pool: WES_prep",
@@ -41,6 +45,10 @@
                     "  snp_bam_index: snp_mtD123456.cram.crai",
                     "  sex: U"
                 ],
+                "nfcmgg_sampletracking_samplesheet_failed.yaml": [
+                    "[",
+                    "  ]"
+                ],
                 "nfcmgg_smallvariants_samplesheet.yaml": [
                     "- sample: D123456WES",
                     "  cram: D123456WES.cram",
@@ -51,6 +59,10 @@
                     "- sample: mtD123456",
                     "  cram: mtD123456.cram",
                     "  crai: mtD123456.cram.crai"
+                ],
+                "nfcmgg_smallvariants_samplesheet_failed.yaml": [
+                    "[",
+                    "  ]"
                 ],
                 "nfcmgg_vivar_samplesheet.yaml": [
                     "- id: D123456WES",
@@ -80,6 +92,10 @@
                     "  nipt: false",
                     "  reads: D123mouse.cram",
                     "  reads_index: D123mouse.cram.crai"
+                ],
+                "nfcmgg_vivar_samplesheet_failed.yaml": [
+                    "[",
+                    "  ]"
                 ],
                 "nfcore_rnafusion_samplesheet.yaml": [
                     "- sample: R123456",
@@ -127,7 +143,7 @@
                 ]
             }
         ],
-        "timestamp": "2026-07-06T17:03:47.52897533",
+        "timestamp": "2026-08-17T10:33:47.943741517",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "26.04.0"
