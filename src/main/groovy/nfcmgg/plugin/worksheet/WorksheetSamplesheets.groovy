@@ -130,6 +130,8 @@ class WorksheetSamplesheets {
                 return finalEntries
             } as List<OutputEntry>
 
+            Path passedSamplesheet = location.resolve(name)
+
             List<OutputEntry> passedEntries = []
             List<OutputEntry> failedEntries = []
             if (filterFunc != null) {
@@ -142,15 +144,14 @@ class WorksheetSamplesheets {
                         failedEntries.add(entry)
                     }
                 }
+                Path failedSamplesheet = location.resolve(
+                    (passedSamplesheet.baseName + '_failed.' + passedSamplesheet.extension) as String
+                )
+                creator.dump(subsetEntries(failedEntries), failedSamplesheet)
             } else {
                 passedEntries = transposedEntries
             }
-            Path passedSamplesheet = location.resolve(name)
-            Path failedSamplesheet = location.resolve(
-                (passedSamplesheet.baseName + '_failed.' + passedSamplesheet.extension) as String
-            )
             creator.dump(subsetEntries(passedEntries), passedSamplesheet)
-            creator.dump(subsetEntries(failedEntries), failedSamplesheet)
         }
 
         private List<OutputEntry> subsetEntries(List<OutputEntry> entries) {

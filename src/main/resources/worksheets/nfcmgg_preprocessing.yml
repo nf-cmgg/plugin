@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=../../../../worksheet-schema.json
 # Define the name of the pipeline. This will be checked against the manifest.name in the config file.
 name: nf-cmgg/preprocessing
 # Define which field of the input block should be used as the common identifier for the sample
@@ -73,14 +74,14 @@ output:
 # - description: A description of the metric. (this is not used by the plugin)
 # - pattern: A regex pattern to match the directory containing the metrics
 # - subpath: The path to the metrics file relative to the directory, only works if the matched path is a directory
-# - type: The type of the metric. Can be one of the following: tsv (default), csv.
+# - filetype: The type of the metric. Can be one of the following: tsv (default), csv, json, yaml, yml.
 # - id: The name of the field in the matched file that should be used as the identifier for the metric. 
 # - field: The name of the field in the matched file that should be used as the value for the metric. 
 metrics:
   yield:
     pattern: '.*_SAV_data$'
     subpath: 'multiqc_bclconvert_bysample.txt'
-    type: tsv
+    filetype: tsv
     id: Sample
     field: yield_
 # Define which samplesheets that should be generated and what their content is.

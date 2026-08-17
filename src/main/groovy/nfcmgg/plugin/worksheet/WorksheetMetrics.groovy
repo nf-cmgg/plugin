@@ -48,7 +48,7 @@ class WorksheetMetrics {
         final String key
         final String pattern
         final String subpath
-        final String type
+        final String filetype
         final String id
         final String field
 
@@ -59,14 +59,15 @@ class WorksheetMetrics {
             }
             pattern = fieldMap.pattern as String
             subpath = fieldMap.subpath != null ? fieldMap.subpath as String : null
-            final String fieldType = fieldMap.type != null ? fieldMap.type as String : null
+            final String fieldType = fieldMap.filetype != null ? fieldMap.filetype as String : null
             final List<String> allowedTypes = ['tsv', 'csv', 'yml', 'yaml', 'json']
             if (fieldType != null && !(fieldType in allowedTypes)) {
                 log.error(
-                    "Invalid type '${fieldType}' for metric field '${key}'. Expected one of: ${allowedTypes.join(', ')}"
+                    "Invalid filetype '${fieldType}' for metric field '${key}'." +
+                    " Expected one of: ${allowedTypes.join(', ')}"
                 )
             }
-            type = fieldType
+            filetype = fieldType
             if (fieldMap.id == null) {
                 log.error("Metric field '${key}' is missing the required 'id' field")
             }
@@ -82,7 +83,7 @@ class WorksheetMetrics {
             if (subpath) {
                 targetPath = targetPath.resolve(subpath)
             }
-            List<Map<String, Object>> data = readFile(targetPath, type)
+            List<Map<String, Object>> data = readFile(targetPath, filetype)
             Map<String, Object> result = [:]
             data.each { Map<String, Object> row ->
                 result[row[id].toString()] = row[field]
