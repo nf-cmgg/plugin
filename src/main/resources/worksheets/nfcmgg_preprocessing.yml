@@ -126,7 +126,7 @@ samplesheets:
       && data.tag?.toLowerCase() == 'rnaseqmdg'
       && data.fastq_1 != null
     filter_func: |
-      data.yield.toLong() >= 1000000L
+      data.yield?.toLong() >= 1000000L
     fields:
       sample:
       fastq_1:

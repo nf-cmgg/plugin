@@ -1,0 +1,197 @@
+{ 
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "description": "Schema for the worksheet configuration YAML file",
+    "type": "object",
+    "required": ["name", "id_field", "input", "samplesheets"],
+    "properties": {
+        "name": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The name of the pipeline for which the worksheet is used. This should match the manifest.name field in the nextflow.config file."
+        },
+        "id_field": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "[\\w\\d_-]*",
+            "description": "The name of the field in the input samplesheet that contains the common identifier. This value will be used to group all values together in the resulting samplesheets."
+        },
+        "input": {
+            "type": "object",
+            "minProperties": 1,
+            "description": "The input block is used to specify how to handle the values fetched from the samplesheet. It is used to remap field names, set defaults and recast the type of values.",
+            "patternProperties": {
+                "[\\w\\d_-]*": {
+                    "type": ["object", "null"],
+                    "description": "The name of the value used by the plugin. This will contain the value fetched from the samplesheet.",
+                    "properties": {
+                        "source": {
+                            "type": "string",
+                            "minLength": 1,
+                            "pattern": "[\\w\\d_-]*",
+                            "description": "The name of the field in the input samplesheet. The 'source' can be omitted if the key value is the same as the field name in the samplesheet"
+                        },
+                        "default": {
+                            "type": ["string", "number", "integer", "boolean", "array", "null"],
+                            "description": "The default value to use whenever this field is empty or missing in the samplesheet. By default 'null' values will be used for missing values."
+                        },
+                        "type": {
+                            "type": "string",
+                            "enum": ["string", "integer", "boolean", "float"],
+                            "description": "The type of the value in the samplesheet. By default this will use the type in the samplesheet.\nKeep in mind that CSV and TSV samplesheet will always have 'string' as the type for the values in it."
+                        },
+                        "description": {
+                            "type": "string",
+                            "description": "A description of the field. This is only used for commenting purposes."
+                        }
+                    }
+                }
+            }
+        },
+        "values": {
+            "type": "object",
+            "description": "The values block is used to define extra constant values or values derived from values in the input samplesheet.",
+            "patternProperties": {
+                "[\\w\\d_-]*": {
+                    "type": "object",
+                    "description": "The name of the new value field to create. Must have one of the following sub-keywords: `value` or `func`. Both sub-keywords cannot be present at the same time.",
+                    "oneOf": [
+                        { "required": ["value"] },
+                        { "required": ["func"] }
+                    ],
+                    "properties": {
+                        "value": {
+                            "type": ["string", "boolean", "integer", "number", "null"],
+                            "description": "A constant value to always add to this value"
+                        },
+                        "func": {
+                            "type": "string",
+                            "description": "Valid Groovy code that determines what the value should be. All values present in the `input` block are available here as input.(key).\nMake this code block as safe to execute as possible by using lots of `?` checks to handle cases where input values are missing."
+                        },
+                        "description": {
+                            "type": "string",
+                            "description": "A description of the field. This is only used for commenting purposes."
+                        }
+                    }
+                }
+            }
+        },
+        "output": {
+            "type": "object",
+            "description": "The output block is used to define which output files should be saved to a particular key. The order of the keys is important as the plugin will only add the matched file to the key that matches first.",
+            "patternProperties": {
+                "[\\w\\d_-]*": {
+                    "type": "object",
+                    "description": "The name of the new value field to create. Must have the `pattern` sub-keyword.",
+                    "required": ["pattern"],
+                    "properties": {
+                        "pattern": {
+                            "type": "string",
+                            "minLength": 1,
+                            "format": "regex",
+                            "description": "A pattern that will be used to determine if the file matches what is expected for this value. This pattern should match the full basename of the file"
+                        },
+                        "description": {
+                            "type": "string",
+                            "description": "A description of the field. This is only used for commenting purposes."
+                        }
+                    }
+                }
+            }
+        },
+        "metrics": {
+            "type": "object",
+            "description": "The metrics block can be used to fetch some values from metrics files.",
+            "patternProperties": {
+                "[\\w\\d_-]*": {
+                    "type": "object",
+                    "description": "The name of the new value field to create. Must have the `pattern`, `id` and `field` sub-keywords.\nThe order is not important in the metrics block since all matches will be handled.",
+                    "required": ["pattern", "id", "field"],
+                    "properties": {
+                        "pattern": {
+                            "type": "string",
+                            "format": "regex",
+                            "minLength": 1,
+                            "description": "A pattern that will be used to determine if the file matches what is expected for this value. This pattern should match the full basename of the file"
+                        },
+                        "subpath": {
+                            "type": "string",
+                            "minLength": 1,
+                            "description": "A sub path pointing to a file if the path resulting from the pattern is a directory. This sub-path can also point to deeply nested files."
+                        },
+                        "filetype": {
+                            "type": "string",
+                            "enum": ["tsv", "csv", "json", "yaml", "yml"],
+                            "default": "tsv",
+                            "description": "The filetype of the file pointed to by the pattern and subpath keywords. Defaults to `tsv`"
+                        },
+                        "id": {
+                            "type": "string",
+                            "minLength": 1,
+                            "description": "The field name in the metrics file that contains the common identifier. This will be used to decide what sample this value belongs to."
+                        },
+                        "field": {
+                            "type": "string",
+                            "minLength": 1,
+                            "description": "The field name in the metrics file that contains the actual metrics value."
+                        },
+                        "description": {
+                            "type": "string",
+                            "description": "A description of the field. This is only used for commenting purposes."
+                        }
+                    }
+                }
+            }
+        },
+        "samplesheets": {
+            "type": "array",
+            "description": "The samplesheets block consists of a list of specifications on how to construct the samplesheets for a specific pipeline.",
+            "minItems": 1,
+            "items": {
+                "type": "object",
+                "description": "A samplesheet specifications entry.",
+                "required": ["name", "fields"],
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "pattern": "^.*\\.ya?ml$",
+                        "description": "The name of the samplesheet that should be created."
+                    },
+                    "description": {
+                        "type": "string",
+                        "description": "A description of the samplesheet. This is only used for commenting purposes."
+                    },
+                    "include_func": {
+                        "type": "string",
+                        "description": "Valid Groovy code that returns a boolean. True values mean that the sample entry should be added to this samplesheet.\nAll values present in the `input`, `values`, `output` and `metric` block are available here as data.(key).\nMake this code block as safe to execute as possible by using lots of `?` checks to handle cases where input values are missing."
+                    },
+                    "filter_func": {
+                        "type": "string",
+                        "description": "Valid Groovy code that returns a boolean. True values mean that the sample passes a determined threshold and that is should be added to the main samplesheet. False values mean that the sample fails some threshold and that it should be added to a `failed` samplesheet.\nAll values present in the `input`, `values`, `output` and `metric` block are available here as data.(key).\nMake this code block as safe to execute as possible by using lots of `?` checks to handle cases where input values are missing."
+                    },
+                    "fields": {
+                        "type": "object",
+                        "description": "All fields that should be added to the samplesheet should be defined here. All key values should be the name of the field in the output samplesheet. Use the `source` keyword if the name does not match whatever was defined earlier in the worksheet. Use `type` to specify the type of the value in the output samplesheet.\nNull values will always be omitted from the samplesheets.",
+                        "patternProperties": {
+                            "[\\w\\d_-]*": {
+                                "type": ["object", "null"],
+                                "properties": {
+                                    "source": {
+                                        "type": "string",
+                                        "description": "The name of the as it is defined in this worksheet. Use this keyword if the field name differs from the name specified in the worksheet.",
+                                        "pattern": "[\\w\\d_-]*"
+                                    },
+                                    "type": {
+                                        "type": "string",
+                                        "enum": ["string", "integer", "float", "boolean"],
+                                        "description": "The type the output value should be cast to. By default the type of the value will be used"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
