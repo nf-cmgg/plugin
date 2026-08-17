@@ -34,6 +34,8 @@ This scope contains the following options:
 - `cmgg.samplesheets.enabled` (default: `false`): Whether to generate samplesheets before pipeline execution.
 - `cmgg.samplesheets.location` (default: `null`): The location where the samplesheets will be generated. If not set, the samplesheets will be generated in the pipeline's output directory. If the output directory is not set, the samplesheets will be generated in the current working directory.
 
+How samplesheets are defined and matched to pipelines is described in [Worksheets](docs/worksheets.md).
+
 ## Building
 
 To build the plugin:
