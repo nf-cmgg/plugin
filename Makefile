@@ -12,7 +12,7 @@ clean:
 
 # Run tests with mock pipelines
 test:
-	$(GRADLE) install && nf-test test
+	$(GRADLE) install && $(GRADLE) test && nf-test test
 
 # Run tests with mock pipelines and update the snapshots
 test-update:

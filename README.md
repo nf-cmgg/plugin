@@ -6,7 +6,7 @@ To use the plugin add the following to your `nextflow.config`:
 
 ```groovy
 plugins {
-   id 'nf-cmgg@0.1.0'
+   id 'nf-cmgg@0.3.0'
 }
 ```
 

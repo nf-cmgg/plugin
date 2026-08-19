@@ -28,6 +28,7 @@ import nextflow.trace.TraceObserverFactoryV2
 import nfcmgg.plugin.samplesheets.PipelineObserver
 import nfcmgg.plugin.config.CmggConfig
 import nfcmgg.plugin.worksheet.Worksheet
+import nfcmgg.plugin.worksheet.WorksheetException
 
 /**
  * Implements a factory object required to create
@@ -58,13 +59,22 @@ class CmggFactory implements TraceObserverFactoryV2 {
             log.info("Detected pipeline name: '${pipelineName}', checking for automatic samplesheet generation")
 
             Worksheet worksheet
-            ((Path) Nextflow.file(getClass().getResource('/worksheets').toURI().toString())).eachFile { res ->
-                if (['yml', 'yaml'].contains(res.extension)) {
-                    String worksheetPipelineName = ((Map)new Yaml().load(res.text)).get('name', '')
-                    if (worksheetPipelineName == pipelineName) {
-                        worksheet = new Worksheet(res)
+            try {
+                ((Path) Nextflow.file(getClass().getResource('/worksheets').toURI().toString())).eachFile { res ->
+                    if (['yml', 'yaml'].contains(res.extension)) {
+                        String worksheetPipelineName = ((Map)new Yaml().load(res.text)).get('name', '')
+                        if (worksheetPipelineName == pipelineName) {
+                            worksheet = new Worksheet(res)
+                        }
                     }
                 }
+            } catch (WorksheetException e) {
+                log.error("Invalid worksheet, skipping automatic samplesheet generation: ${e.message}")
+                return observers
+            /* groovylint-disable-next-line CatchException */
+            } catch (Exception e) {
+                log.error("Failed to set up samplesheet generation, continuing pipeline: ${e.message}")
+                return observers
             }
 
             if (!worksheet) {

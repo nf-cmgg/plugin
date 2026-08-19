@@ -31,19 +31,42 @@ class WorksheetSamplesheets {
 
     WorksheetSamplesheets(List<Map> samplesheets, Set<String> dataFields) {
         if (samplesheets == null || samplesheets.isEmpty()) {
-            log.error('Worksheet samplesheets is missing or empty')
+            final WorksheetErrors errors = new WorksheetErrors()
+            errors.error('Worksheet samplesheets is missing or empty')
+            errors.throwIfAny('Invalid worksheet samplesheets')
         }
         final List<Samplesheet> parsed = []
-        samplesheets.each { Map entry ->
-            parsed.add(new Samplesheet(entry, dataFields))
+        samplesheets.each { rawEntry ->
+            try {
+                final Map entry = rawEntry as Map
+                final WorksheetErrors entryErrors = new WorksheetErrors()
+                final Samplesheet sheet = new Samplesheet(entry, dataFields, entryErrors)
+                if (entryErrors.hasErrors()) {
+                    final String label = entry?.name ?: '(unnamed)'
+                    log.error("Skipping samplesheet '${label}' due to validation errors")
+                } else {
+                    parsed.add(sheet)
+                }
+            /* groovylint-disable-next-line CatchException */
+            } catch (Exception e) {
+                log.error("Skipping samplesheet entry due to an error: ${e.message}")
+            }
+        }
+        if (parsed.isEmpty()) {
+            log.error('No valid samplesheet entries remain after validation')
         }
         this.samplesheets = parsed.asImmutable()
     }
 
     void publishSamplesheets(Map<String, OutputEntry> entries, Path location) {
         samplesheets.each { Samplesheet samplesheet ->
-            log.info("Publishing samplesheet '${samplesheet.name}'")
-            samplesheet.publish(entries, location, creator)
+            try {
+                log.info("Publishing samplesheet '${samplesheet.name}'")
+                samplesheet.publish(entries, location, creator)
+            /* groovylint-disable-next-line CatchException */
+            } catch (Exception e) {
+                log.error("Skipping samplesheet '${samplesheet.name}' due to an error: ${e.message}")
+            }
         }
     }
 
@@ -58,27 +81,27 @@ class WorksheetSamplesheets {
         final String filterFunc
         final List<Field> fields
 
-        Samplesheet(Map entry, Set<String> dataFields) {
+        Samplesheet(Map entry, Set<String> dataFields, WorksheetErrors errors) {
             if (entry.name == null) {
-                log.error('Samplesheet entry is missing the required \'name\' field')
+                errors.error('Samplesheet entry is missing the required \'name\' field')
             }
             name = entry.name as String
             includeFunc = entry.include_func != null ? entry.include_func as String : null
             filterFunc = entry.filter_func != null ? entry.filter_func as String : null
             if (includeFunc != null) {
-                validateFunc(name, 'include_func', includeFunc, dataFields)
+                validateFunc(name, 'include_func', includeFunc, dataFields, errors)
             }
             if (filterFunc != null) {
-                validateFunc(name, 'filter_func', filterFunc, dataFields)
+                validateFunc(name, 'filter_func', filterFunc, dataFields, errors)
             }
             if (entry.fields == null) {
-                log.error("Samplesheet '${name}' is missing the required 'fields' field")
+                errors.error("Samplesheet '${name}' is missing the required 'fields' field")
             }
             final Map<String, Map> fieldsMap = (
                 entry.fields != null ? entry.fields as Map : [:]
             ) as Map<String, Map>
             final List<Field> parsed = fieldsMap.collect { String key, Map value ->
-                return new Field(key.toString(), value)
+                return new Field(key.toString(), value, errors)
             }
             fields = parsed.asImmutable()
         }
@@ -168,17 +191,19 @@ class WorksheetSamplesheets {
             return subset
         }
 
-        private void validateFunc(String name, String funcName, String func, Set<String> dataFields) {
+        private void validateFunc(
+            String name, String funcName, String func, Set<String> dataFields, WorksheetErrors errors
+        ) {
             try {
-                new GroovyShell().parse(func)
+                SafeGroovy.parse(func)
             } catch (CompilationFailedException e) {
-                log.error("Invalid Groovy expression in samplesheet '${name}' ${funcName}: ${e.message}")
+                errors.error("Invalid Groovy expression in samplesheet '${name}' ${funcName}: ${e.message}")
             }
             final Matcher matcher = DATA_FIELD_PATTERN.matcher(func)
             while (matcher.find()) {
                 final String referenced = matcher.group(1)
                 if (!dataFields.contains(referenced)) {
-                    log.error(
+                    errors.error(
                         "Samplesheet '${name}' ${funcName} references unknown data field 'data.${referenced}'. " +
                         "Available data fields: ${dataFields.sort().join(', ')}"
                     )
@@ -198,25 +223,38 @@ class WorksheetSamplesheets {
         final String source
         final String type
 
-        Field(String key, Map<String, Object> fieldValue) {
+        Field(String key, Map<String, Object> fieldValue, WorksheetErrors errors) {
             this.key = key
             // If the value is omitted, the data field name matches the key
             source = fieldValue?.get('source')?.toString() ?: key
             type = fieldValue?.get('type')?.toString() ?: ''
+            if (type != '' && !(type in ['string', 'integer', 'float', 'boolean'])) {
+                errors.error(
+                    "Invalid type '${type}' for samplesheet field '${key}'. " +
+                    'Expected one of: string, integer, float, boolean'
+                )
+            }
         }
 
         Object convert(OutputEntry entry) {
             Object value = entry.get(source)
             if (value != null && type != '') {
-                switch (type) {
-                case 'integer':
-                    return value as Integer
-                case 'float':
-                    return value as Float
-                case 'boolean':
-                    return value as Boolean
-                case 'string':
-                    return value as String
+                try {
+                    switch (type) {
+                        case 'integer':
+                            return value as Integer
+                        case 'float':
+                            return value as Float
+                        case 'boolean':
+                            return value as Boolean
+                        case 'string':
+                            return value as String
+                    }
+                /* groovylint-disable-next-line CatchException */
+                } catch (Exception e) {
+                    throw new WorksheetException(
+                        "Failed to convert samplesheet field '${key}' to ${type}: ${e.message}"
+                    )
                 }
             }
             return value
