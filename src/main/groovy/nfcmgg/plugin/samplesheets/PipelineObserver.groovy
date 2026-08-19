@@ -99,7 +99,7 @@ class PipelineObserver implements TraceObserverV2 {
 
     @Override
     void onFlowComplete() {
-        worksheet.samplesheets.publishSamplesheets(entries, location)
+        worksheet.samplesheets.publishSamplesheets(entries, location, session.params)
     }
 
     /**
@@ -111,7 +111,7 @@ class PipelineObserver implements TraceObserverV2 {
     private Map<String, Object> getDefaultValuesForSample(String sample) {
         Map<String,Object> sampleData = inputData.find { entry -> entry.get(worksheet.idField, '') == sample } ?: [:]
         Map<String, Object> inputMap = worksheet.input.convert(sampleData)
-        return worksheet.values.convert(inputMap)
+        return worksheet.values.convert(inputMap, session.params)
     }
 
     /**

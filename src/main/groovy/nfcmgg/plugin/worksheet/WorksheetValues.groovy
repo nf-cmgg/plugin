@@ -38,9 +38,9 @@ class WorksheetValues {
         errors.throwIfAny('Invalid worksheet values')
     }
 
-    Map<String, Object> convert(Map<String, Object> inputData) {
+    Map<String, Object> convert(Map<String, Object> inputData, Map<String, Object> params) {
         Map<String, Object> convertedData = inputData
-        Binding inputBinding = new Binding([input: inputData])
+        Binding inputBinding = new Binding([input: inputData, params: params])
         GroovyShell inputShell = SafeGroovy.shell(inputBinding)
         fields.each { key, field ->
             convertedData[key] = field.define(inputShell)

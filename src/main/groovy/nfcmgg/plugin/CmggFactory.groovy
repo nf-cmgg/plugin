@@ -88,7 +88,6 @@ class CmggFactory implements TraceObserverFactoryV2 {
             }
 
             observers << new PipelineObserver(config.samplesheets.location, worksheet)
-
         }
         return observers
     }

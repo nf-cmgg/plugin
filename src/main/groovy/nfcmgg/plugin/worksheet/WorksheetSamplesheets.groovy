@@ -58,11 +58,11 @@ class WorksheetSamplesheets {
         this.samplesheets = parsed.asImmutable()
     }
 
-    void publishSamplesheets(Map<String, OutputEntry> entries, Path location) {
+    void publishSamplesheets(Map<String, OutputEntry> entries, Path location, Map<String, Object> params) {
         samplesheets.each { Samplesheet samplesheet ->
             try {
                 log.info("Publishing samplesheet '${samplesheet.name}'")
-                samplesheet.publish(entries, location, creator)
+                samplesheet.publish(entries, location, creator, params)
             /* groovylint-disable-next-line CatchException */
             } catch (Exception e) {
                 log.error("Skipping samplesheet '${samplesheet.name}' due to an error: ${e.message}")
@@ -106,7 +106,12 @@ class WorksheetSamplesheets {
             fields = parsed.asImmutable()
         }
 
-        void publish(Map<String, OutputEntry> entries, Path location, SamplesheetCreator creator) {
+        void publish(
+            Map<String, OutputEntry> entries,
+            Path location,
+            SamplesheetCreator creator,
+            Map<String, Object> params
+        ) {
             if (!name || !fields) {
                 return
             }
@@ -115,7 +120,7 @@ class WorksheetSamplesheets {
             List<OutputEntry> filteredEntries = sortedEntries.values().toList()
             if (includeFunc != null) {
                 filteredEntries = sortedEntries.findAll { String key, OutputEntry entry ->
-                    Binding binding = new Binding([data: entry])
+                    Binding binding = new Binding([data: entry, params: params])
                     GroovyShell shell = SafeGroovy.shell(binding)
                     shell.evaluate(includeFunc) as Boolean
                 }.values().toList()
@@ -160,7 +165,7 @@ class WorksheetSamplesheets {
             List<OutputEntry> failedEntries = []
             if (filterFunc != null) {
                 transposedEntries.each { OutputEntry entry ->
-                    Binding binding = new Binding([data: entry])
+                    Binding binding = new Binding([data: entry, params: params])
                     GroovyShell shell = SafeGroovy.shell(binding)
                     if (shell.evaluate(filterFunc) as Boolean) {
                         passedEntries.add(entry)

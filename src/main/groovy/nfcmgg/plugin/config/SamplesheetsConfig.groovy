@@ -50,7 +50,7 @@ class SamplesheetsConfig implements ConfigScope {
         this.enabled = getBoolean(config?.enabled, 'cmgg.samplesheets.enabled')
         this.location = getPath(config?.location, 'cmgg.samplesheets.location')
         if (config?.worksheets in List) {
-            worksheets = config.worksheets.collect { sheet -> 
+            worksheets = config.worksheets.collect { sheet ->
                 Path worksheetPath = getPath(sheet, 'cmgg.samplesheets.worksheets')
                 if (!worksheetPath.exists()) {
                     log.error("Worksheet '${sheet}' does not exist, skipping...")
@@ -58,6 +58,7 @@ class SamplesheetsConfig implements ConfigScope {
                 }
                 return worksheetPath
             }.findAll { sheet -> sheet != null }
+            }
         }
+
     }
-}
