@@ -58,16 +58,21 @@ class CmggFactory implements TraceObserverFactoryV2 {
 
             log.info("Detected pipeline name: '${pipelineName}', checking for automatic samplesheet generation")
 
+            List<Path> worksheets = config.samplesheets.worksheets
+            ((Path) Nextflow.file(getClass().getResource('/worksheets').toURI().toString())).eachFile { res ->
+                worksheets << res
+            }
             Worksheet worksheet
             try {
-                ((Path) Nextflow.file(getClass().getResource('/worksheets').toURI().toString())).eachFile { res ->
-                    if (['yml', 'yaml'].contains(res.extension)) {
-                        String worksheetPipelineName = ((Map)new Yaml().load(res.text)).get('name', '')
+                worksheet = new Worksheet(worksheets.find { Path worksheetPath ->
+                    if (['yml', 'yaml'].contains(worksheetPath.extension)) {
+                        String worksheetPipelineName = ((Map)new Yaml().load(worksheetPath.text)).get('name', '')
                         if (worksheetPipelineName == pipelineName) {
-                            worksheet = new Worksheet(res)
+                            return true
                         }
                     }
-                }
+                    return false
+                })
             } catch (WorksheetException e) {
                 log.error("Invalid worksheet, skipping automatic samplesheet generation: ${e.message}")
                 return observers
@@ -84,16 +89,6 @@ class CmggFactory implements TraceObserverFactoryV2 {
 
             observers << new PipelineObserver(config.samplesheets.location, worksheet)
 
-        // switch (pipelineName) {
-        //     case 'nf-cmgg/preprocessing':
-        //         observers << new PreprocessingObserver(config.samplesheets.location)
-        //         break
-        //     case 'nf-core/rnafusion':
-        //         observers << new RnafusionObserver(config.samplesheets.location)
-        //         break
-        //     default:
-        //         log.info('No automatic samplesheet generation possible for the current pipeline')
-        // }
         }
         return observers
     }
