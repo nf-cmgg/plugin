@@ -26,6 +26,7 @@ import groovy.util.logging.Slf4j
 import nextflow.config.spec.ConfigOption
 import nextflow.config.spec.ConfigScope
 import nextflow.script.dsl.Description
+import nextflow.Nextflow
 
 /**
  * Main configuration scope for the nf-cmgg plugin.
@@ -59,6 +60,9 @@ class SamplesheetsConfig implements ConfigScope {
                 return worksheetPath
             }.findAll { sheet -> sheet != null }
             }
+        ((Path) Nextflow.file(getClass().getResource('/worksheets').toURI().toString())).eachFile { res ->
+            worksheets << res
+        }
         }
 
     }

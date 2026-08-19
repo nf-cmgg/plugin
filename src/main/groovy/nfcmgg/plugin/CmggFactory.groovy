@@ -21,7 +21,6 @@ import java.nio.file.Path
 import groovy.util.logging.Slf4j
 import groovy.transform.CompileStatic
 import nextflow.Session
-import nextflow.Nextflow
 import nextflow.trace.TraceObserverV2
 import nextflow.trace.TraceObserverFactoryV2
 
@@ -59,12 +58,9 @@ class CmggFactory implements TraceObserverFactoryV2 {
             log.info("Detected pipeline name: '${pipelineName}', checking for automatic samplesheet generation")
 
             List<Path> worksheets = config.samplesheets.worksheets
-            ((Path) Nextflow.file(getClass().getResource('/worksheets').toURI().toString())).eachFile { res ->
-                worksheets << res
-            }
             Worksheet worksheet
             try {
-                worksheet = new Worksheet(worksheets.find { Path worksheetPath ->
+                Path validWorksheet = worksheets.find { Path worksheetPath ->
                     if (['yml', 'yaml'].contains(worksheetPath.extension)) {
                         String worksheetPipelineName = ((Map)new Yaml().load(worksheetPath.text)).get('name', '')
                         if (worksheetPipelineName == pipelineName) {
@@ -72,18 +68,18 @@ class CmggFactory implements TraceObserverFactoryV2 {
                         }
                     }
                     return false
-                })
+                }
+                if (!validWorksheet) {
+                    log.info('No worksheet found for the current pipeline, skipping automatic samplesheet generation')
+                    return observers
+                }
+                worksheet = new Worksheet(validWorksheet)
             } catch (WorksheetException e) {
                 log.error("Invalid worksheet, skipping automatic samplesheet generation: ${e.message}")
                 return observers
             /* groovylint-disable-next-line CatchException */
             } catch (Exception e) {
                 log.error("Failed to set up samplesheet generation, continuing pipeline: ${e.message}")
-                return observers
-            }
-
-            if (!worksheet) {
-                log.info('No worksheet found for the current pipeline, skipping automatic samplesheet generation')
                 return observers
             }
 

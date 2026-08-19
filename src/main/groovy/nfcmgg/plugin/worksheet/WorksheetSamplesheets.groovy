@@ -115,15 +115,16 @@ class WorksheetSamplesheets {
             if (!name || !fields) {
                 return
             }
-            /* groovylint-disable-next-line AssignCollectionSort */
-            Map<String, OutputEntry> sortedEntries = entries.sort { entry -> entry.key }
-            List<OutputEntry> filteredEntries = sortedEntries.values().toList()
+            List<OutputEntry> sortedEntries = entries.entrySet()
+                .sort { a, b -> a.key <=> b.key }
+                *.value
+            List<OutputEntry> filteredEntries = sortedEntries
             if (includeFunc != null) {
-                filteredEntries = sortedEntries.findAll { String key, OutputEntry entry ->
+                filteredEntries = sortedEntries.findAll { OutputEntry entry ->
                     Binding binding = new Binding([data: entry, params: params])
                     GroovyShell shell = SafeGroovy.shell(binding)
                     shell.evaluate(includeFunc) as Boolean
-                }.values().toList()
+                }
             }
 
             List<OutputEntry> transposedEntries = filteredEntries.collectMany { OutputEntry entry ->

@@ -124,11 +124,11 @@ After conversion, these fields are available as `input.<key>` in the `values` bl
 
 Adds constant or computed fields based on input values. Each entry must set **either** `value` **or** `func` (not both).
 
-| Option        | Meaning                                                                                                                                                                                          |
-| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `value`       | Constant always set for every sample.                                                                                                                                                            |
-| `func`        | Groovy expression. Use `input.<field>` for fields from `input`. Prefer safe navigation (`?.`) for missing values. Additionaly it also has access to all parameters using the `params` structure. |
-| `description` | Documentation only.                                                                                                                                                                              |
+| Option        | Meaning                                                                                                                                                                                           |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `value`       | Constant always set for every sample.                                                                                                                                                             |
+| `func`        | Groovy expression. Use `input.<field>` for fields from `input`. Prefer safe navigation (`?.`) for missing values. Additionally it also has access to all parameters using the `params` structure. |
+| `description` | Documentation only.                                                                                                                                                                               |
 
 ```yaml
 values:
@@ -204,13 +204,13 @@ Here, a published directory matching `.*_SAV_data$` is opened, `multiqc_bclconve
 
 A list of samplesheets to write when the run finishes. Each entry can contain the following keywords:
 
-| Option         | Meaning                                                                                                                                                                                                                                                        |
-| -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `name`         | Output filename; must end in `.yaml` or `.yml` (required).                                                                                                                                                                                                     |
-| `description`  | Documentation only.                                                                                                                                                                                                                                            |
-| `include_func` | Groovy boolean. If omitted, all samples are candidates. Use `data.<field>` to fetch values defined in the `input`, `values`, `output` and `metrics` blocks. Additionaly it also has access to all parameters using the `params` structure.                     |
-| `filter_func`  | Groovy boolean for QC thresholds. Failures go to `<basename>_failed.<ext>`. Use `data.<field>` to fetch values defined in the `input`, `values`, `output` and `metrics` blocks. Additionaly it also has access to all parameters using the `params` structure. |
-| `fields`       | Columns of the output YAML (required).                                                                                                                                                                                                                         |
+| Option         | Meaning                                                                                                                                                                                                                                                         |
+| -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`         | Output filename; must end in `.yaml` or `.yml` (required).                                                                                                                                                                                                      |
+| `description`  | Documentation only.                                                                                                                                                                                                                                             |
+| `include_func` | Groovy boolean. If omitted, all samples are candidates. Use `data.<field>` to fetch values defined in the `input`, `values`, `output` and `metrics` blocks. Additionally it also has access to all parameters using the `params` structure.                     |
+| `filter_func`  | Groovy boolean for QC thresholds. Failures go to `<basename>_failed.<ext>`. Use `data.<field>` to fetch values defined in the `input`, `values`, `output` and `metrics` blocks. Additionally it also has access to all parameters using the `params` structure. |
+| `fields`       | Columns of the output YAML (required).                                                                                                                                                                                                                          |
 
 ### Field mappings
 
@@ -258,7 +258,7 @@ samplesheets:
 
 With `filter_func`, samples that fail are written to e.g. `nfcore_rnafusion_samplesheet_failed.yaml`.
 
-In `include_func` and `filter_func`, `data` exposes everything defined in `input`, `values`, `output`, and `metrics`. Additionaly it also has access to all parameters using the `params` structure.
+In `include_func` and `filter_func`, `data` exposes everything defined in `input`, `values`, `output`, and `metrics`. Additionally it also has access to all parameters using the `params` structure.
 
 ## End-to-end example
 

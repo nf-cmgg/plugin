@@ -21,7 +21,6 @@ import static nfcmgg.plugin.utils.SessionFetcher.getInputSamplesheetList
 
 import nfcmgg.plugin.worksheet.Worksheet
 import nfcmgg.plugin.worksheet.WorksheetOutput
-import nfcmgg.plugin.worksheet.WorksheetMetrics
 
 import groovy.util.logging.Slf4j
 import groovy.transform.CompileStatic
@@ -87,8 +86,7 @@ class PipelineObserver implements TraceObserverV2 {
             entries[sample].append(field.key, targetPath)
         }
 
-        List<WorksheetMetrics.Field> metrics = worksheet.metrics.matchingFields(targetName)
-        metrics.each { metric ->
+        worksheet.metrics?.matchingFields(targetName).each { metric ->
             Map<String, Object> metricData = metric.convert(targetPath)
             metricData.each { String sample, Object value ->
                 addSampleIfMissing(sample)
@@ -111,7 +109,7 @@ class PipelineObserver implements TraceObserverV2 {
     private Map<String, Object> getDefaultValuesForSample(String sample) {
         Map<String,Object> sampleData = inputData.find { entry -> entry.get(worksheet.idField, '') == sample } ?: [:]
         Map<String, Object> inputMap = worksheet.input.convert(sampleData)
-        return worksheet.values.convert(inputMap, session.params)
+        return worksheet.values?.convert(inputMap, session.params) ?: inputMap
     }
 
     /**
