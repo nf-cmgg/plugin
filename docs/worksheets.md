@@ -36,15 +36,15 @@ By adding the following line at the top of the worksheet, you can have the [Yaml
 
 ## File structure
 
-| Key | Required | Purpose |
-|-----|----------|---------|
-| `name` | yes | Pipeline name; must equal `manifest.name` in the `nextflow.config` file |
-| `id_field` | yes | Column in the **input** samplesheet used as the common identifier |
-| `input` | yes | Define how to fetch values from the input samplesheet |
-| `values` | no | Extra or derived fields (constants or derived values based on input values) |
-| `output` | yes | Regex patterns that capture published files |
-| `metrics` | no | Pull values from metrics files (e.g. MultiQC tables) |
-| `samplesheets` | yes | List of output samplesheets to generate and how to structure them |
+| Key            | Required | Purpose                                                                     |
+| -------------- | -------- | --------------------------------------------------------------------------- |
+| `name`         | yes      | Pipeline name; must equal `manifest.name` in the `nextflow.config` file     |
+| `id_field`     | yes      | Column in the **input** samplesheet used as the common identifier           |
+| `input`        | yes      | Define how to fetch values from the input samplesheet                       |
+| `values`       | no       | Extra or derived fields (constants or derived values based on input values) |
+| `output`       | yes      | Regex patterns that capture published files                                 |
+| `metrics`      | no       | Pull values from metrics files (e.g. MultiQC tables)                        |
+| `samplesheets` | yes      | List of output samplesheets to generate and how to structure them           |
 
 Minimal skeleton:
 
@@ -96,20 +96,20 @@ Defines how columns from the pipeline input samplesheet become fields the rest o
 
 Each key is the **plugin field name**, meaning that this is the key used later on to use this specific value. Options:
 
-| Option | Meaning |
-|--------|---------|
-| `source` | Column name in the input samplesheet. Defaults to the key. |
-| `default` | Used when the column is missing or empty. Defaults to `null`. |
-| `type` | Cast to `string`, `integer`, `float`, or `boolean`. Default: `string`. CSV/TSV inputs are always strings until cast. |
-| `description` | Documentation only; ignored at runtime. |
+| Option        | Meaning                                                                                                              |
+| ------------- | -------------------------------------------------------------------------------------------------------------------- |
+| `source`      | Column name in the input samplesheet. Defaults to the key.                                                           |
+| `default`     | Used when the column is missing or empty. Defaults to `null`.                                                        |
+| `type`        | Cast to `string`, `integer`, `float`, or `boolean`. Default: `string`. CSV/TSV inputs are always strings until cast. |
+| `description` | Documentation only; ignored at runtime.                                                                              |
 
 ```yaml
 input:
-  id:                          # same name as column "id"
+  id: # same name as column "id"
   sample:
-    source: samplename         # remap samplename → sample
+    source: samplename # remap samplename → sample
   tag:
-    default: ''
+    default: ""
   sample_type:
     default: DNA
   sex:
@@ -124,11 +124,11 @@ After conversion, these fields are available as `input.<key>` in the `values` bl
 
 Adds constant or computed fields based on input values. Each entry must set **either** `value` **or** `func` (not both).
 
-| Option | Meaning |
-|--------|---------|
-| `value` | Constant always set for every sample. |
-| `func` | Groovy expression. Use `input.<field>` for fields from `input`. Prefer safe navigation (`?.`) for missing values. |
-| `description` | Documentation only. |
+| Option        | Meaning                                                                                                           |
+| ------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `value`       | Constant always set for every sample.                                                                             |
+| `func`        | Groovy expression. Use `input.<field>` for fields from `input`. Prefer safe navigation (`?.`) for missing values. |
+| `description` | Documentation only.                                                                                               |
 
 ```yaml
 values:
@@ -148,10 +148,10 @@ values:
 
 Maps published files to field names by matching the file **basename** with a regex.
 
-| Option | Meaning |
-|--------|---------|
-| `pattern` | Regex against the full basename (required). |
-| `description` | Documentation only. |
+| Option        | Meaning                                     |
+| ------------- | ------------------------------------------- |
+| `pattern`     | Regex against the full basename (required). |
+| `description` | Documentation only.                         |
 
 **Order matters.** The plugin uses the **first** matching pattern. Put more specific patterns before broader ones.
 
@@ -162,7 +162,7 @@ output:
   snp_crai:
     pattern: 'snp_.*\.cram\.crai$'
   cram:
-    pattern: '.*\.cram$'      # would also match snp_*.cram if listed first
+    pattern: '.*\.cram$' # would also match snp_*.cram if listed first
   crai:
     pattern: '.*\.crai$'
   fastq_1:
@@ -179,20 +179,20 @@ Reads values from metrics files (for example MultiQC tables) and attaches them t
 
 Unlike `output`, **every** matching metric is applied (order does not matter).
 
-| Option | Meaning |
-|--------|---------|
-| `pattern` | Regex against the published path basename (required). |
-| `subpath` | Relative path inside a matched **directory**. |
-| `filetype` | `tsv` (default), `csv`, `json`, `yaml`, or `yml`. |
-| `id` | Column/key in the metrics file that identifies the sample (required). |
-| `field` | Column/key holding the metric value (required). |
-| `description` | Documentation only. |
+| Option        | Meaning                                                               |
+| ------------- | --------------------------------------------------------------------- |
+| `pattern`     | Regex against the published path basename (required).                 |
+| `subpath`     | Relative path inside a matched **directory**.                         |
+| `filetype`    | `tsv` (default), `csv`, `json`, `yaml`, or `yml`.                     |
+| `id`          | Column/key in the metrics file that identifies the sample (required). |
+| `field`       | Column/key holding the metric value (required).                       |
+| `description` | Documentation only.                                                   |
 
 ```yaml
 metrics:
   yield:
-    pattern: '.*_SAV_data$'
-    subpath: 'multiqc_bclconvert_bysample.txt'
+    pattern: ".*_SAV_data$"
+    subpath: "multiqc_bclconvert_bysample.txt"
     filetype: tsv
     id: Sample
     field: yield_
@@ -204,22 +204,22 @@ Here, a published directory matching `.*_SAV_data$` is opened, `multiqc_bclconve
 
 A list of samplesheets to write when the run finishes. Each entry can contain the following keywords:
 
-| Option | Meaning |
-|--------|---------|
-| `name` | Output filename; must end in `.yaml` or `.yml` (required). |
-| `description` | Documentation only. |
-| `include_func` | Groovy boolean. If omitted, all samples are candidates. Use `data.<field>` to fetch values defined in the `input`, `values`, `output` and `metrics` blocks. |
-| `filter_func` | Groovy boolean for QC thresholds. Failures go to `<basename>_failed.<ext>`. Use `data.<field>` to fetch values defined in the `input`, `values`, `output` and `metrics` blocks.|
-| `fields` | Columns of the output YAML (required). |
+| Option         | Meaning                                                                                                                                                                         |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`         | Output filename; must end in `.yaml` or `.yml` (required).                                                                                                                      |
+| `description`  | Documentation only.                                                                                                                                                             |
+| `include_func` | Groovy boolean. If omitted, all samples are candidates. Use `data.<field>` to fetch values defined in the `input`, `values`, `output` and `metrics` blocks.                     |
+| `filter_func`  | Groovy boolean for QC thresholds. Failures go to `<basename>_failed.<ext>`. Use `data.<field>` to fetch values defined in the `input`, `values`, `output` and `metrics` blocks. |
+| `fields`       | Columns of the output YAML (required).                                                                                                                                          |
 
 ### Field mappings
 
 Keys under `fields` are column names in the **output** samplesheet:
 
-| Option | Meaning |
-|--------|---------|
+| Option   | Meaning                                                        |
+| -------- | -------------------------------------------------------------- |
 | `source` | Plugin data field to take the value from. Defaults to the key. |
-| `type` | Cast to `string`, `integer`, `float`, or `boolean`. |
+| `type`   | Cast to `string`, `integer`, `float`, or `boolean`.            |
 
 `null` values are omitted from the written samplesheet.
 
@@ -280,7 +280,7 @@ input:
   sample:
     source: samplename
   tag:
-    default: ''
+    default: ""
   sample_type:
     default: DNA
 

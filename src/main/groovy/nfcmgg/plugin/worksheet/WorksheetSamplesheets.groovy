@@ -110,6 +110,7 @@ class WorksheetSamplesheets {
             if (!name || !fields) {
                 return
             }
+            /* groovylint-disable-next-line AssignCollectionSort */
             Map<String, OutputEntry> sortedEntries = entries.sort { entry -> entry.key }
             List<OutputEntry> filteredEntries = sortedEntries.values().toList()
             if (includeFunc != null) {

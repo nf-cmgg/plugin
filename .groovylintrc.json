@@ -1,23 +1,23 @@
 {
-    "extends": "recommended",
-    "rules": {
-        "DuplicateListLiteral": {
-            "enabled": false
-        },
-        "DuplicateNumberLiteral": {
-            "enabled": false
-        },
-        "DuplicateStringLiteral": {
-            "enabled": false
-        },
-        "IfStatementCouldBeTernary": {
-            "enabled": false
-        },
-        "UnnecessaryGetter": {
-            "enabled": false
-        },
-        "UnnecessaryObjectReferences": {
-            "enabled": false
-        }
+  "extends": "recommended",
+  "rules": {
+    "DuplicateListLiteral": {
+      "enabled": false
+    },
+    "DuplicateNumberLiteral": {
+      "enabled": false
+    },
+    "DuplicateStringLiteral": {
+      "enabled": false
+    },
+    "IfStatementCouldBeTernary": {
+      "enabled": false
+    },
+    "UnnecessaryGetter": {
+      "enabled": false
+    },
+    "UnnecessaryObjectReferences": {
+      "enabled": false
     }
+  }
 }
