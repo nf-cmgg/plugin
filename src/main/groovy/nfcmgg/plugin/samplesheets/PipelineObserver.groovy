@@ -97,7 +97,9 @@ class PipelineObserver implements TraceObserverV2 {
 
     @Override
     void onFlowComplete() {
-        worksheet.samplesheets.publishSamplesheets(entries, location, session.params)
+        if (session.success) {
+            worksheet.samplesheets.publishSamplesheets(entries, location, session.params)
+        }
     }
 
     /**
