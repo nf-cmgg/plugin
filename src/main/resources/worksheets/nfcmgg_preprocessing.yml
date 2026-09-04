@@ -186,5 +186,6 @@ samplesheets:
     fields:
       sample:
       family:
+        source: family_number
       cram:
       crai:

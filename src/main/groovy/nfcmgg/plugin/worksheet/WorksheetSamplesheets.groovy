@@ -53,7 +53,9 @@ class WorksheetSamplesheets {
             }
         }
         if (parsed.isEmpty()) {
-            log.error('No valid samplesheet entries remain after validation')
+            final WorksheetErrors errors = new WorksheetErrors()
+            errors.error('No valid samplesheet entries remain after validation')
+            errors.throwIfAny('Invalid worksheet samplesheets')
         }
         this.samplesheets = parsed.asImmutable()
     }
@@ -101,7 +103,7 @@ class WorksheetSamplesheets {
                 entry.fields != null ? entry.fields as Map : [:]
             ) as Map<String, Map>
             final List<Field> parsed = fieldsMap.collect { String key, Map value ->
-                return new Field(key.toString(), value, errors)
+                return new Field(key.toString(), value, errors, dataFields)
             }
             fields = parsed.asImmutable()
         }
@@ -127,6 +129,7 @@ class WorksheetSamplesheets {
                 }
             }
 
+            // TODO: Make this more robust: https://github.com/nf-cmgg/plugin/pull/12#discussion_r3925022554
             List<OutputEntry> transposedEntries = filteredEntries.collectMany { OutputEntry entry ->
                 List<Map<String, Object>> multiValues = []
                 Map<String, Object> values = entry.values
@@ -230,10 +233,16 @@ class WorksheetSamplesheets {
         final String source
         final String type
 
-        Field(String key, Map<String, Object> fieldValue, WorksheetErrors errors) {
+        Field(String key, Map<String, Object> fieldValue, WorksheetErrors errors, Set<String> dataFields) {
             this.key = key
             // If the value is omitted, the data field name matches the key
             source = fieldValue?.get('source')?.toString() ?: key
+            if (!dataFields.contains(source)) {
+                errors.error(
+                    "Invalid source '${source}' for samplesheet field '${key}'. " +
+                    "Available data fields: ${dataFields.sort().join(', ')}"
+                )
+            }
             type = fieldValue?.get('type')?.toString() ?: ''
             if (type != '' && !(type in ['string', 'integer', 'float', 'boolean'])) {
                 errors.error(

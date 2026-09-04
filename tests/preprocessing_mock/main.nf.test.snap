@@ -43,12 +43,15 @@
                 ],
                 "nfcmgg_smallvariants_samplesheet.yaml": [
                     "- sample: D123456WES",
+                    "  family: Proband_123456",
                     "  cram: D123456WES.cram",
                     "  crai: D123456WES.cram.crai",
                     "- sample: D123456WGS",
+                    "  family: Proband_123456",
                     "  cram: D123456WGS.cram",
                     "  crai: D123456WGS.cram.crai",
                     "- sample: mtD123456",
+                    "  family: mito_family",
                     "  cram: mtD123456.cram",
                     "  crai: mtD123456.cram.crai"
                 ],
@@ -127,7 +130,7 @@
                 ]
             }
         ],
-        "timestamp": "2026-08-17T14:11:16.582338816",
+        "timestamp": "2026-09-04T14:50:53.833600948",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "26.04.0"

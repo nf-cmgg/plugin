@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "description": "Schema for the worksheet configuration YAML file",
   "type": "object",
-  "required": ["name", "id_field", "input", "samplesheets"],
+  "required": ["name", "id_field", "input", "output", "samplesheets"],
   "properties": {
     "name": {
       "type": "string",
