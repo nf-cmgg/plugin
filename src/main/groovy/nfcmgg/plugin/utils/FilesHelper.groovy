@@ -34,12 +34,12 @@ class FilesHelper {
         }
     }
 
-    static List<Map<String, Object>> readSamplesheet(Path samplesheet) {
+    static List<Map<String, Object>> readFile(Path samplesheet, String type=null) {
         if (!samplesheet.exists()) {
             log.warn("Could not read samplesheet: ${samplesheet.toUriString()}")
             return []
         }
-        String extension = samplesheet.extension
+        String extension = type != null ? type : samplesheet.extension
         if (extension == 'yaml' || extension == 'yml') {
             // Parse YAML file
             return new Yaml().load(samplesheet.text) as List<Map<String, Object>>
@@ -57,7 +57,7 @@ class FilesHelper {
                 // Parse JSON file
                 return new groovy.json.JsonSlurper().parseText(samplesheet.text) as List<Map<String, Object>>
         }
-        log.warn("Unsupported samplesheet format: $extension")
+        log.warn("Unsupported file format: $extension")
         return []
     }
 

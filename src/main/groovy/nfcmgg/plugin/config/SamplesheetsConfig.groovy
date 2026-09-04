@@ -21,15 +21,18 @@ import static nfcmgg.plugin.utils.ConfigTypeChecker.getPath
 import java.nio.file.Path
 
 import groovy.transform.CompileDynamic
+import groovy.util.logging.Slf4j
 
 import nextflow.config.spec.ConfigOption
 import nextflow.config.spec.ConfigScope
 import nextflow.script.dsl.Description
+import nextflow.Nextflow
 
 /**
  * Main configuration scope for the nf-cmgg plugin.
  */
 @CompileDynamic
+@Slf4j
 class SamplesheetsConfig implements ConfigScope {
 
     @ConfigOption
@@ -40,9 +43,26 @@ class SamplesheetsConfig implements ConfigScope {
     @Description('Location to create the samplesheet files after successful pipeline execution.')
     Path location
 
+    @ConfigOption
+    @Description('A list of worksheets to use for the automatic samplesheet generation.')
+    List<Path> worksheets = []
+
     SamplesheetsConfig(Map config) {
         this.enabled = getBoolean(config?.enabled, 'cmgg.samplesheets.enabled')
         this.location = getPath(config?.location, 'cmgg.samplesheets.location')
-    }
+        if (config?.worksheets in List) {
+            worksheets = config.worksheets.collect { sheet ->
+                Path worksheetPath = getPath(sheet, 'cmgg.samplesheets.worksheets')
+                if (!worksheetPath.exists()) {
+                    log.error("Worksheet '${sheet}' does not exist, skipping...")
+                    return null
+                }
+                return worksheetPath
+            }.findAll { sheet -> sheet != null }
+            }
+        ((Path) Nextflow.file(getClass().getResource('/worksheets').toURI().toString())).eachFile { res ->
+            worksheets << res
+        }
+        }
 
-}
+    }

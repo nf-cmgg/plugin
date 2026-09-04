@@ -52,7 +52,7 @@ class SessionFetcher {
             return []
         }
         Path samplesheetPath = Nextflow.file(samplesheetLocation) as Path
-        List<Map<String, Object>> samplesheetList = FilesHelper.readSamplesheet(samplesheetPath)
+        List<Map<String, Object>> samplesheetList = FilesHelper.readFile(samplesheetPath)
         // Add samples from flowcells to samplesheet input (only applicable for preprocessing)
         List<Map<String, Object>> flowcellSamples = []
         samplesheetList?.each { entry ->
@@ -60,7 +60,7 @@ class SessionFetcher {
             if (!sampleInfo) {
                 return
             }
-            flowcellSamples.addAll(FilesHelper.readSamplesheet(Nextflow.file(sampleInfo) as Path))
+            flowcellSamples.addAll(FilesHelper.readFile(Nextflow.file(sampleInfo) as Path))
         }
         return samplesheetList + flowcellSamples
     }
