@@ -3,6 +3,7 @@
 1. Removed the hardcoded setup of samplesheet generation and migrated to a worksheet implementation to generate samplesheets. See the [worksheets](docs/worksheets.md) documentation for more information
 2. Use `clusters` to get the amount of reads for rnafusion runs instead of the `yield_`
 3. Resolved all configuration warnings
+4. Removed the timestamp from the defaults samplesheets output directory
 
 ## 0.2.8
 
