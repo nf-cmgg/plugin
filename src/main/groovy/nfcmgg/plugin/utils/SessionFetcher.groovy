@@ -30,8 +30,6 @@ import nextflow.Nextflow
 @CompileDynamic
 class SessionFetcher {
 
-    final private static String CREATIONDATE = new Date().format('yyyyMMdd_HHmmss')
-
     static Path getOutdir(Session session) {
         String outdirString = session?.params?.get('outdir', null)
         Path outdir = outdirString ? Nextflow.file(outdirString) as Path : null
@@ -43,7 +41,7 @@ class SessionFetcher {
     }
 
     static Path getSamplesheetOutdir(Session session) {
-        return getOutdir(session).resolve("samplesheets/${CREATIONDATE}")
+        return getOutdir(session).resolve('samplesheets')
     }
 
     static List<Map<String, Object>> getInputSamplesheetList(Session session) {
