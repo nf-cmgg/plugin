@@ -32,13 +32,15 @@ import nextflow.script.dsl.Description
 @Description('The `cmgg` scope allows you to configure the nf-cmgg plugin.')
 class CmggConfig implements ConfigScope {
 
-    @ConfigOption
     @Description('Configuration scope for the creation of `DONE` files after successful pipeline execution.')
-    DoneConfig done
+    final DoneConfig done
 
-    @ConfigOption
     @Description('Configuration scope for the automatic generation of samplesheets for all supported pipelines.')
-    SamplesheetsConfig samplesheets
+    final SamplesheetsConfig samplesheets
+
+    // Keep the no-arg constructor in order to be able to use the `@ConfigOption` annotation
+    CmggConfig() {
+    }
 
     CmggConfig(Map config) {
         Map doneConfig = getMap(config?.done, 'cmgg.done')

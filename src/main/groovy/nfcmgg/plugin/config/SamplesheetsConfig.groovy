@@ -37,15 +37,15 @@ class SamplesheetsConfig implements ConfigScope {
 
     @ConfigOption
     @Description('Configuration scope for the creation of samplesheet files after successful pipeline execution.')
-    Boolean enabled = false
+    final Boolean enabled = false
 
     @ConfigOption
     @Description('Location to create the samplesheet files after successful pipeline execution.')
-    Path location
+    final Path location
 
     @ConfigOption
     @Description('A list of worksheets to use for the automatic samplesheet generation.')
-    List<Path> worksheets = []
+    final List<Path> worksheets = []
 
     SamplesheetsConfig(Map config) {
         this.enabled = getBoolean(config?.enabled, 'cmgg.samplesheets.enabled')
@@ -59,10 +59,10 @@ class SamplesheetsConfig implements ConfigScope {
                 }
                 return worksheetPath
             }.findAll { sheet -> sheet != null }
-            }
+        }
         ((Path) Nextflow.file(getClass().getResource('/worksheets').toURI().toString())).eachFile { res ->
             worksheets << res
         }
-        }
-
     }
+
+}

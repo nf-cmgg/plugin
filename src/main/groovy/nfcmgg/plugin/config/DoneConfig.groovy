@@ -34,11 +34,11 @@ class DoneConfig implements ConfigScope {
 
     @ConfigOption
     @Description('Create a DONE file after successful pipeline execution.')
-    Boolean enabled = false
+    final Boolean enabled = false
 
     @ConfigOption
     @Description('Location to create the DONE file after successful pipeline execution.')
-    Path location
+    final Path location
 
     DoneConfig(Map config) {
         this.enabled = getBoolean(config?.enabled, 'cmgg.done.enabled')
