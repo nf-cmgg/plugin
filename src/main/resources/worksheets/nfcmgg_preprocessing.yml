@@ -78,12 +78,12 @@ output:
 # - id: The name of the field in the matched file that should be used as the identifier for the metric.
 # - field: The name of the field in the matched file that should be used as the value for the metric.
 metrics:
-  yield:
+  clusters:
     pattern: ".*_SAV_data$"
     subpath: "multiqc_bclconvert_bysample.txt"
     filetype: tsv
     id: Sample
-    field: yield_
+    field: clusters
 # Define which samplesheets that should be generated and what their content is.
 # This is structured as a list of maps, where each map contains the following keys:
 # - name: The name of the YAML samplesheet to generate
@@ -126,14 +126,14 @@ samplesheets:
       && data.tag?.toLowerCase() == 'rnaseqmdg'
       && data.fastq_1 != null
     filter_func: |
-      data.yield?.toLong() >= 1000000L
+      data.clusters?.toLong() >= 1000000L
     fields:
       sample:
       fastq_1:
       fastq_2:
       strandedness:
       reads:
-        source: yield
+        source: clusters
   - name: nfcmgg_vivar_samplesheet.yaml
     description: The samplesheet for the nf-cmgg/vivar pipeline
     include_func: |

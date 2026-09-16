@@ -74,7 +74,7 @@ process MOCK_OUTPUT {
 
     # Creating SAV data
     mkdir multiqc_SAV_data
-    echo "Sample\tyield_" > multiqc_SAV_data/multiqc_bclconvert_bysample.txt
+    echo "Sample\tclusters" > multiqc_SAV_data/multiqc_bclconvert_bysample.txt
     ${sav_data}
     """
 }

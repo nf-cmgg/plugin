@@ -13,6 +13,7 @@ results
 *.yml
 !src/main/resources/**/*.yml
 !src/main/resources/**/*.yaml
+!.github/workflows/**.yml
 DONE
 !tests/*/*.yaml
 .nf-test*
