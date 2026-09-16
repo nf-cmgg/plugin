@@ -6,7 +6,7 @@ To use the plugin add the following to your `nextflow.config`:
 
 ```groovy
 plugins {
-   id 'nf-cmgg@0.1.0'
+   id 'nf-cmgg@0.3.0'
 }
 ```
 
@@ -31,8 +31,11 @@ The `samplesheets` configuration scope allows you to configure the generation of
 
 This scope contains the following options:
 
-- `cmgg.samplesheets.enabled` (default: `false`): Whether to generate samplesheets before pipeline execution.
+- `cmgg.samplesheets.enabled` (default: `false`): Whether to generate samplesheets after pipeline execution.
 - `cmgg.samplesheets.location` (default: `null`): The location where the samplesheets will be generated. If not set, the samplesheets will be generated in the pipeline's output directory. If the output directory is not set, the samplesheets will be generated in the current working directory.
+- `cmgg.samplesheets.worksheets` (default: `[]`): A list of locations of worksheets used to create samplesheets. The first worksheet for which the `name` field matches the pipeline name will be used. The default worksheets will be appended to this list so that they are only used whenever no worksheet for that specific pipeline is provided.
+
+How samplesheets are defined and matched to pipelines is described in [Worksheets](docs/worksheets.md).
 
 ## Building
 

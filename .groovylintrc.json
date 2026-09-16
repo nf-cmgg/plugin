@@ -10,7 +10,13 @@
     "DuplicateStringLiteral": {
       "enabled": false
     },
+    "IfStatementCouldBeTernary": {
+      "enabled": false
+    },
     "UnnecessaryGetter": {
+      "enabled": false
+    },
+    "UnnecessaryObjectReferences": {
       "enabled": false
     }
   }

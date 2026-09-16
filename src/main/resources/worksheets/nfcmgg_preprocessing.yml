@@ -1,0 +1,191 @@
+# yaml-language-server: $schema=../../../../worksheet-schema.json
+# Define the name of the pipeline. This will be checked against the manifest.name in the config file.
+name: nf-cmgg/preprocessing
+# Define which field of the input block should be used as the common identifier for the sample
+id_field: samplename
+# Define the expected fields of the input samplesheet.
+# Key-value pairs should be used here where the key is the name used by the plugin
+# and the value is the name in the samplesheet. Leave the value empty
+# if the field name is the same
+# All fields can take the following key-value pairs:
+# - description: A description of the field. (this is not used by the plugin)
+# - default: A default value for the field, the default value will be set to `null` if missing
+# - source: The name of the field in the original samplesheet. If not provided, the key will be used.
+# - type: The type of the field. Can be one of the following: string (default), integer, float, boolean.
+input:
+  id:
+  sample:
+    source: samplename
+  tag:
+    default: ""
+  organism:
+  genome:
+  sample_type:
+    default: DNA
+  binsize:
+  vivar_project:
+  family_number:
+  library:
+  sex:
+    default: U
+# Define extra values to be added to the input data, possibly based on other input data
+# This can also be used to overwrite values from the samplesheet if necessary
+# - description: A description of the field. (this is not used by the plugin)
+# - value: A fixed value to be added to the input data, if missing
+# - func: A function to be called to generate the value.
+#         The function will be called with the input data as the argument.
+#         Use input.<field> to access a specific field
+values:
+  strandedness:
+    value: unknown
+  normdup:
+    func: input.tag.toLowerCase() == "copgt-m"
+  nipt:
+    func: input.tag.toLowerCase() == "cfdnaseq"
+  binsize:
+    func: |
+      (input.organism?.toLowerCase() == 'mus musculus' || input.genome?.toLowerCase() == 'mm10')
+      && ![100, 500].contains(input.binsize) ? 100 : input.binsize
+  exomecnv_batch:
+    func: 'input.library + "_" + input.sex'
+# Define which output files that should be remembered for samplesheet generation.
+# Key-value pairs should be used here where the key is the name used by the plugin
+# All fields can take the following key-value pairs:
+# - description: A description of the field. (this is not used by the plugin)
+# - pattern: A regex pattern to match the basename of the output file
+output:
+  snp_cram:
+    pattern: 'snp_.*\.cram$'
+  snp_crai:
+    pattern: 'snp_.*\.cram\.crai$'
+  cram:
+    pattern: '.*\.cram$'
+  crai:
+    pattern: '.*\.crai$'
+  fastq_1:
+    pattern: '.*R1_\d\d\d\.fastq\.gz$'
+  fastq_2:
+    pattern: '.*R2_\d\d\d\.fastq\.gz$'
+  per_base_bed:
+    pattern: '.*\.per-base\.bed\.gz$'
+  per_base_bed_index:
+    pattern: '.*\.per-base\.bed\.gz\.csi$'
+# Define how to fetch metrics for specific samples from the MULTIQC files
+# - description: A description of the metric. (this is not used by the plugin)
+# - pattern: A regex pattern to match the directory containing the metrics
+# - subpath: The path to the metrics file relative to the directory, only works if the matched path is a directory
+# - filetype: The type of the metric. Can be one of the following: tsv (default), csv, json, yaml, yml.
+# - id: The name of the field in the matched file that should be used as the identifier for the metric.
+# - field: The name of the field in the matched file that should be used as the value for the metric.
+metrics:
+  yield:
+    pattern: ".*_SAV_data$"
+    subpath: "multiqc_bclconvert_bysample.txt"
+    filetype: tsv
+    id: Sample
+    field: yield_
+# Define which samplesheets that should be generated and what their content is.
+# This is structured as a list of maps, where each map contains the following keys:
+# - name: The name of the YAML samplesheet to generate
+# - description: A description of the samplesheet. (this is not used by the plugin)
+# - include_func: A function that returns a boolean value indication if the sample
+#                 should be included in the samplesheet. Use the `data.<name>` variable to access any above defined field.
+#                 If this is missing, all samples will be included.
+# - filter_func: A function that returns a boolean value indication if the sample
+#                should be included in the samplesheet. Use the `data.<name>` variable to access any above defined field.
+#                All samples that do not pass this filter will be added to a samplesheet that has the `_failed` suffix.
+# - fields: Key-value pairs where the key is the name used in the resulting samplesheet
+#           and the value is a map with optional keys:
+#           - source: The name of the data value provided in the above blocks. Will use the key if not provided.
+#           - type: The type of the field. Can be one of the following: string, integer, float, boolean. Defaults to the type of the data
+samplesheets:
+  - name: nfcmgg_sampletracking_samplesheet.yaml
+    description: The samplesheet for the nf-cmgg/sampletracking pipeline
+    include_func: |
+      (data.organism?.toLowerCase() == 'homo sapiens' || data.genome?.toLowerCase() == 'grch38')
+      && data.sample_type?.toLowerCase() == 'dna'
+      && data.tag?.toLowerCase() in ['wes', 'wgs']
+    fields:
+      sample:
+      pool:
+        source: library
+      sample_bam:
+        source: cram
+      sample_bam_index:
+        source: crai
+      snp_bam:
+        source: snp_cram
+      snp_bam_index:
+        source: snp_crai
+      sex:
+  - name: nfcore_rnafusion_samplesheet.yaml
+    description: The samplesheet for the nfcore/rnafusion pipeline
+    include_func: |
+      (data.organism?.toLowerCase() == 'homo sapiens' || data.genome?.toLowerCase() == 'grch38')
+      && data.sample_type?.toLowerCase() == 'rna'
+      && data.tag?.toLowerCase() == 'rnaseqmdg'
+      && data.fastq_1 != null
+    filter_func: |
+      data.yield?.toLong() >= 1000000L
+    fields:
+      sample:
+      fastq_1:
+      fastq_2:
+      strandedness:
+      reads:
+        source: yield
+  - name: nfcmgg_vivar_samplesheet.yaml
+    description: The samplesheet for the nf-cmgg/vivar pipeline
+    include_func: |
+      (
+        data.organism?.toLowerCase() == 'homo sapiens' 
+        || data.organism?.toLowerCase() == 'mus musculus'
+        || data.genome?.toLowerCase() == 'grch38'
+        || data.genome?.toLowerCase() == 'mm10'
+      )
+      && data.sample_type?.toLowerCase() in ['dna', 'tissue']
+      && !data.id?.startsWith('mtD')
+    fields:
+      id:
+      organism:
+      tag:
+      binsize:
+        type: integer
+      project:
+        source: vivar_project
+      normdup:
+      nipt:
+      reads:
+        source: cram
+      reads_index:
+        source: crai
+  - name: nfcmgg_exomecnv_samplesheet.yaml
+    description: The samplesheet for the nf-cmgg/exomecnv pipeline
+    include_func: |
+      (data.organism?.toLowerCase() == 'homo sapiens' || data.genome?.toLowerCase() == 'grch38')
+      && data.sample_type?.toLowerCase() == 'dna'
+      && data.tag?.toLowerCase() in ['wes']
+    fields:
+      sample:
+      batch:
+        source: exomecnv_batch
+      family:
+        source: family_number
+      cram:
+      crai:
+      bed:
+        source: per_base_bed
+      bed_index:
+        source: per_base_bed_index
+  - name: nfcmgg_smallvariants_samplesheet.yaml
+    description: The samplesheet for the nf-cmgg/smallvariants pipeline
+    include_func: |
+      (data.organism?.toLowerCase() == 'homo sapiens' || data.genome?.toLowerCase() == 'grch38')
+      && data.sample_type?.toLowerCase() == 'dna'
+      && data.tag?.toLowerCase() in ['wes', 'wgs']
+    fields:
+      sample:
+      family:
+        source: family_number
+      cram:
+      crai:

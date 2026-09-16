@@ -63,7 +63,7 @@ class OutputEntry {
         return newEntry
     }
 
-    OutputEntry append(String key, String value) {
+    OutputEntry append(String key, Object value) {
         if (!this.values.containsKey(key)) {
             this.values[key] = []
         }

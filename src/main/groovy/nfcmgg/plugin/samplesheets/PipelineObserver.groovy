@@ -19,6 +19,9 @@ import static nfcmgg.plugin.utils.ParseHelper.sampleFromPath
 import static nfcmgg.plugin.utils.SessionFetcher.getSamplesheetOutdir
 import static nfcmgg.plugin.utils.SessionFetcher.getInputSamplesheetList
 
+import nfcmgg.plugin.worksheet.Worksheet
+import nfcmgg.plugin.worksheet.WorksheetOutput
+
 import groovy.util.logging.Slf4j
 import groovy.transform.CompileStatic
 
@@ -27,6 +30,7 @@ import java.nio.file.Path
 
 import nextflow.Session
 import nextflow.trace.TraceObserverV2
+import nextflow.trace.event.FilePublishEvent
 
 /**
  * A base observer class to be extended per pipeline
@@ -35,21 +39,19 @@ import nextflow.trace.TraceObserverV2
 @CompileStatic
 class PipelineObserver implements TraceObserverV2 {
 
-    final SamplesheetCreator creator = new SamplesheetCreator()
-
     Map<String, OutputEntry> entries = new ConcurrentHashMap<>()
 
     // Location where the samplesheets should be generated
     Path location
+
+    // The worksheet used to configure the samplesheet generation
+    Worksheet worksheet
 
     // The input samplesheet converted to a List of maps
     List<Map<String, Object>> inputData
 
     // The nextflow session
     Session session
-
-    // The key in the samplesheet that contains the sample name
-    String sampleKey = 'sample'
 
     // A set of all sample names
     Set<String> samples
@@ -59,17 +61,45 @@ class PipelineObserver implements TraceObserverV2 {
      * @param location the location where the samplesheets should be generated,
      * if null it will be determined from the session
      */
-    PipelineObserver(Path location) {
+    PipelineObserver(Path location, Worksheet worksheet) {
         this.location = location
+        this.worksheet = worksheet
     }
 
     @Override
     void onFlowCreate(Session session) {
         this.location = this.location ?: getSamplesheetOutdir(session)
         this.inputData = getInputSamplesheetList(session)
-        this.samples = inputData*.get(sampleKey).findAll { sample -> sample != null }.toSet() as Set<String>
+        this.samples = inputData*.get(worksheet.idField).findAll { sample -> sample != null }.toSet() as Set<String>
         this.session = session
         log.info("Samplesheets will be generated in '$location'")
+    }
+
+    @Override
+    void onFilePublish(FilePublishEvent event) {
+        String targetName = event.target.name
+        String targetPath = event.target.toUriString()
+
+        WorksheetOutput.Field field = worksheet.output.matchingField(targetName)
+        if (field) {
+            String sample = safeGetSampleFromPath(targetName)
+            entries[sample].append(field.key, targetPath)
+        }
+
+        worksheet.metrics?.matchingFields(targetName).each { metric ->
+            Map<String, Object> metricData = metric.convert(targetPath)
+            metricData.each { String sample, Object value ->
+                addSampleIfMissing(sample)
+                entries[sample].add(metric.key, value)
+            }
+        }
+    }
+
+    @Override
+    void onFlowComplete() {
+        if (session.success) {
+            worksheet.samplesheets.publishSamplesheets(entries, location, session.params)
+        }
     }
 
     /**
@@ -78,8 +108,10 @@ class PipelineObserver implements TraceObserverV2 {
      * @return a map of key-value pairs to be added to the sample entry when it is first created
      */
     /* groovylint-disable-next-line UnusedMethodParameter */
-    Map<String, Object> getDefaultValuesForSample(String sample) {
-        return [:]
+    private Map<String, Object> getDefaultValuesForSample(String sample) {
+        Map<String,Object> sampleData = inputData.find { entry -> entry.get(worksheet.idField, '') == sample } ?: [:]
+        Map<String, Object> inputMap = worksheet.input.convert(sampleData)
+        return worksheet.values?.convert(inputMap, session.params) ?: inputMap
     }
 
     /**
@@ -94,7 +126,7 @@ class PipelineObserver implements TraceObserverV2 {
      * @param basePath the base path for which to get the sample name
      * @return the sample name for the given base path
      */
-    protected String safeGetSample(String inputBasePath) {
+    private String safeGetSampleFromPath(String inputBasePath) {
         String basePath = inputBasePath
         // Make sure SNP tracking data will be added to the correct sample
         if (basePath.startsWith('snp_')) {
@@ -120,12 +152,16 @@ class PipelineObserver implements TraceObserverV2 {
                     "Multiple possible samples found for path '$basePath': $possibleSamples, using '$sample' as sample name, because it is the longest match"
                 )
         }
+        addSampleIfMissing(sample)
+        return sample
+    }
+
+    private void addSampleIfMissing(String sample) {
         entries.putIfAbsent(
             sample,
             /* groovylint-disable-next-line UnnecessaryCast */
             new OutputEntry(['id': sample] as Map<String, Object> + getDefaultValuesForSample(sample))
         )
-        return sample
     }
 
 }
