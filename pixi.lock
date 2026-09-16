@@ -8,7 +8,7 @@ environments:
     - url: https://conda.anaconda.org/bioconda/
     packages:
       linux-64:
-      - conda: https://conda.anaconda.org/bioconda/noarch/nextflow-26.04.0-h2a3209d_0.conda
+      - conda: https://conda.anaconda.org/bioconda/noarch/nextflow-26.04.6-h2a3209d_1.conda
       - conda: https://conda.anaconda.org/bioconda/noarch/nf-test-0.9.5-h2a3209d_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/_openmp_mutex-4.5-20_gnu.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/alsa-lib-1.2.15.3-hb03c661_0.conda
@@ -88,16 +88,19 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/gradle-9.3.1-h707e725_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/npm-groovy-lint-18.0.0-h7b269df_0.conda
 packages:
-- conda: https://conda.anaconda.org/bioconda/noarch/nextflow-26.04.0-h2a3209d_0.conda
-  sha256: 1313c4260de838ff524e6d70514525b0b2845d750c95fe98ce955f68b2d93eff
-  md5: a35a8222291bdc1a2d856334581a97e4
+- conda: https://conda.anaconda.org/bioconda/noarch/nextflow-26.04.6-h2a3209d_1.conda
+  sha256: 452805a6a3cc3f4e28417d855c7c03001dce1b2557a7e8ae46971d3a8778f9af
+  md5: 4fea597e1977b0221de342a3bfb2d971
   depends:
   - coreutils
   - curl
-  - openjdk >=17,<=24
+  - openjdk >=17,<26
   license: Apache-2.0
-  size: 37285498
-  timestamp: 1777437043349
+  run_exports:
+    weak:
+    - nextflow >=26.4.6,<26.5.0a0
+  size: 37863659
+  timestamp: 1784828644646
 - conda: https://conda.anaconda.org/bioconda/noarch/nf-test-0.9.5-h2a3209d_0.conda
   sha256: a99f62b01c74b01854c01bdebe765110f4754e2245ec536df10a521ad96befd5
   md5: 394b91381c88e5c7df30b7e34fefd6e5

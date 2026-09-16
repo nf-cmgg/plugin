@@ -15,7 +15,8 @@ nextflowPlugin {
     className = 'nfcmgg.plugin.CmggPlugin'
     extensionPoints = [
         'nfcmgg.plugin.CmggExtension',
-        'nfcmgg.plugin.CmggFactory'
+        'nfcmgg.plugin.CmggFactory',
+        'nfcmgg.plugin.config.CmggConfig'
     ]
 
 }
