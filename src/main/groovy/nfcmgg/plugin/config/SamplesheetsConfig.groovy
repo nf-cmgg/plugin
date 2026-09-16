@@ -59,10 +59,10 @@ class SamplesheetsConfig implements ConfigScope {
                 }
                 return worksheetPath
             }.findAll { sheet -> sheet != null }
-        }
+            }
         ((Path) Nextflow.file(getClass().getResource('/worksheets').toURI().toString())).eachFile { res ->
             worksheets << res
         }
-    }
+        }
 
-}
+    }
