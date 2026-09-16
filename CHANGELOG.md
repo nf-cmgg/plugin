@@ -1,3 +1,9 @@
+## 0.3.0
+
+1. Removed the hardcoded setup of samplesheet generation and migrated to a worksheet implementation to generate samplesheets. See the [worksheets](docs/worksheets.md) documentation for more information
+2. Use `clusters` to get the amount of reads for rnafusion runs instead of the `yield_`
+3. Resolved all configuration warnings
+
 ## 0.2.8
 
 1. Set the default mouse binsize to 100 if the given binsize is not 100 or 500
