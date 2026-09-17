@@ -102,6 +102,7 @@ samplesheets:
 
     void 'invalid samplesheet entries are skipped and valid ones are kept'() {
         when:
+        Set<String> dataFields = ['sample'] as Set
         WorksheetSamplesheets sheets = new WorksheetSamplesheets([
             [fields: [sample: [:]]],
             [
@@ -113,7 +114,7 @@ samplesheets:
                 include_func: 'data.unknown == true',
                 fields: [sample: [:]]
             ]
-        ], ['sample'] as Set)
+        ], dataFields, new WorksheetSamplesheetsSettings([:], dataFields))
 
         then:
         sheets.samplesheets.size() == 1
@@ -122,7 +123,8 @@ samplesheets:
 
     void 'empty samplesheets block aborts because the block itself is required'() {
         when:
-        new WorksheetSamplesheets([], ['sample'] as Set)
+        Set<String> dataFields = ['sample'] as Set
+        new WorksheetSamplesheets([], dataFields, new WorksheetSamplesheetsSettings([:], dataFields))
 
         then:
         thrown(WorksheetException)

@@ -1,3 +1,7 @@
+## 0.4.0
+
+1. Added a new worksheet field: `samplesheets_setting`. This field can be used to change the behaviour of the samplesheet creation.
+
 ## 0.3.0
 
 1. Removed the hardcoded setup of samplesheet generation and migrated to a worksheet implementation to generate samplesheets. See the [worksheets](docs/worksheets.md) documentation for more information

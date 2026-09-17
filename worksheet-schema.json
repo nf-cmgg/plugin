@@ -196,6 +196,16 @@
           }
         }
       }
+    },
+    "samplesheets_settings": {
+      "type": "object",
+      "description": "Settings related to how samplesheets should be generated.",
+      "properties": {
+        "split_by": {
+          "type": "string",
+          "description": "The field by which the samplesheet should be split. An additional directory will be created which will consist of this value. All samples for which the specified value is empty will be in the `other` directory."
+        }
+      }
     }
   }
 }

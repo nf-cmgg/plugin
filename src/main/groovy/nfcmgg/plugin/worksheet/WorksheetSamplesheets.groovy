@@ -24,17 +24,20 @@ class WorksheetSamplesheets {
 
     final SamplesheetCreator creator = new SamplesheetCreator()
 
+    final WorksheetSamplesheetsSettings settings
+
     /**
      * Samplesheet definitions in declaration order
      */
     final List<Samplesheet> samplesheets
 
-    WorksheetSamplesheets(List<Map> samplesheets, Set<String> dataFields) {
+    WorksheetSamplesheets(List<Map> samplesheets, Set<String> dataFields, WorksheetSamplesheetsSettings settings) {
         if (samplesheets == null || samplesheets.isEmpty()) {
             final WorksheetErrors errors = new WorksheetErrors()
             errors.error('Worksheet samplesheets is missing or empty')
             errors.throwIfAny('Invalid worksheet samplesheets')
         }
+        this.settings = settings
         final List<Samplesheet> parsed = []
         samplesheets.each { rawEntry ->
             try {

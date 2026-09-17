@@ -99,8 +99,11 @@ class Worksheet {
                 dataFields.addAll(parsedMetrics.fields.keySet())
             }
             try {
+                final WorksheetSamplesheetsSettings samplesheetSettings = new WorksheetSamplesheetsSettings(
+                    worksheetMap.samplesheets_settings as Map, dataFields
+                )
                 parsedSamplesheets = new WorksheetSamplesheets(
-                    worksheetMap.samplesheets as List<Map>, dataFields
+                    worksheetMap.samplesheets as List<Map>, dataFields, samplesheetSettings
                 )
             } catch (WorksheetException e) {
                 errors.record(e.message)
