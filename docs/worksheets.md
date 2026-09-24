@@ -204,13 +204,13 @@ Here, a published directory matching `.*_SAV_data$` is opened, `multiqc_bclconve
 
 A list of samplesheets to write when the run finishes. Each entry can contain the following keywords:
 
-| Option         | Meaning                                                                                                                                                                                                                                                         |
-| -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `name`         | Output filename; must end in `.yaml` or `.yml` (required).                                                                                                                                                                                                      |
-| `description`  | Documentation only.                                                                                                                                                                                                                                             |
-| `include_func` | Groovy boolean. If omitted, all samples are candidates. Use `data.<field>` to fetch values defined in the `input`, `values`, `output` and `metrics` blocks. Additionally it also has access to all parameters using the `params` structure.                     |
-| `filter_func`  | Groovy boolean for QC thresholds. Failures go to `<basename>_failed.<ext>`. Use `data.<field>` to fetch values defined in the `input`, `values`, `output` and `metrics` blocks. Additionally it also has access to all parameters using the `params` structure. |
-| `fields`       | Columns of the output YAML (required).                                                                                                                                                                                                                          |
+| Option         | Meaning                                                                                                                                                                                                                                                                                                                                                                                         |
+| -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`         | Output filename; must end in `.yaml` or `.yml` (required).                                                                                                                                                                                                                                                                                                                                      |
+| `description`  | Documentation only.                                                                                                                                                                                                                                                                                                                                                                             |
+| `include_func` | Groovy boolean. If omitted, all samples are candidates. Use `data.<field>` to fetch values defined in the `input`, `values`, `output` and `metrics` blocks. Additionally it also has access to all parameters using the `params` structure.                                                                                                                                                     |
+| `filter_func`  | Groovy boolean for QC thresholds. Failures go to `<basename>_failed.<ext>`. Use `data.<field>` to fetch values defined in the `input`, `values`, `output` and `metrics` blocks. Additionally it also has accessAdded a new worksheet field: `samplesheets_setting`. This field can be used to change the behaviour of the samplesheet creation. to all parameters using the `params` structure. |
+| `fields`       | Columns of the output YAML (required).                                                                                                                                                                                                                                                                                                                                                          |
 
 ### Field mappings
 
@@ -259,6 +259,14 @@ samplesheets:
 With `filter_func`, samples that fail are written to e.g. `nfcore_rnafusion_samplesheet_failed.yaml`.
 
 In `include_func` and `filter_func`, `data` exposes everything defined in `input`, `values`, `output`, and `metrics`. Additionally it also has access to all parameters using the `params` structure.
+
+## `samplesheet_settings`
+
+A map containing settings on how to generate the samplesheets.
+
+| Option     | Meaning                                                                                                                                                                                                                                                                                                |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `split_by` | A worksheet field name to split the samplesheets on. Whenever this option is used, a directory with the value of the worksheet field will be created and each samplesheet will be published in that location (only containing samplesheet entries with the same value in the specific worksheet field) |
 
 ## End-to-end example
 
