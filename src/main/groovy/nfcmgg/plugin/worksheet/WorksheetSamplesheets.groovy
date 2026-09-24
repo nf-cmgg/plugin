@@ -63,7 +63,37 @@ class WorksheetSamplesheets {
         this.samplesheets = parsed.asImmutable()
     }
 
-    void publishSamplesheets(Map<String, OutputEntry> entries, Path location, Map<String, Object> params) {
+    void publishSamplesheets(
+        Map<String, OutputEntry> entries,
+        Path location,
+        Map<String, Object> params
+    ) {
+        if (settings.splitBy) {
+            Map<String, Map<String, OutputEntry>> splitEntries = [:]
+            entries
+                .each { String key, OutputEntry entry ->
+                    String splitOption = entry.values[settings.splitBy] as String ?: 'undefined'
+                    if (!splitEntries.containsKey(splitOption)) {
+                        splitEntries[splitOption] = [:]
+                    }
+                    splitEntries[splitOption][key] = entry
+                }
+            splitEntries
+                .each { String splitOption, Map<String, OutputEntry> newEntries ->
+                    Path newLocation = location.resolve(splitOption)
+                    pushSamplesheets(newEntries, newLocation, creator, params)
+                }
+        } else {
+            pushSamplesheets(entries, location, creator, params)
+        }
+    }
+
+    private void pushSamplesheets(
+        Map<String, OutputEntry> entries,
+        Path location,
+        SamplesheetCreator creator,
+        Map<String, Object> params
+    ) {
         samplesheets.each { Samplesheet samplesheet ->
             try {
                 log.info("Publishing samplesheet '${samplesheet.name}'")
