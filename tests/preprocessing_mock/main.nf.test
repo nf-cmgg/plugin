@@ -16,7 +16,11 @@ nextflow_pipeline {
         then {
             assert workflow.success
             assert snapshot(path("${outputDir}/samplesheets/").list().collectEntries { f ->
-                [f.toString().tokenize("/")[-1], f.text.replaceAll("${outputDir}/", '').tokenize('\n')]
+                if (!f.toString().endsWith('.yaml') && !f.toString().endsWith('.yml')) {
+                    [f.toString().tokenize("/")[-1], f.list().collect { f2 -> Utils.create_yaml_snap(f2, outputDir) }]
+                } else {
+                    Utils.create_yaml_snap(f, outputDir)
+                }
             }).match()
         }
 
