@@ -57,6 +57,7 @@ process MOCK_OUTPUT {
         .collect { entry -> "echo '' | gzip > ${entry.samplename}.per-base.bed.gz && echo '' | gzip > ${entry.samplename}.per-base.bed.gz.csi"}
         .join("\n    ")
     def sav_data = input_list
+        .findAll { entry -> entry.samplename }
         .collect { entry -> "echo '${entry.samplename}\t${entry.get('reads_to_use_in_test', '-1')}' >> multiqc_SAV_data/multiqc_bclconvert_bysample.txt"}
         .join("\n    ")
     """
