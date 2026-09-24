@@ -24,17 +24,20 @@ class WorksheetSamplesheets {
 
     final SamplesheetCreator creator = new SamplesheetCreator()
 
+    final WorksheetSamplesheetsSettings settings
+
     /**
      * Samplesheet definitions in declaration order
      */
     final List<Samplesheet> samplesheets
 
-    WorksheetSamplesheets(List<Map> samplesheets, Set<String> dataFields) {
+    WorksheetSamplesheets(List<Map> samplesheets, Set<String> dataFields, WorksheetSamplesheetsSettings settings) {
         if (samplesheets == null || samplesheets.isEmpty()) {
             final WorksheetErrors errors = new WorksheetErrors()
             errors.error('Worksheet samplesheets is missing or empty')
             errors.throwIfAny('Invalid worksheet samplesheets')
         }
+        this.settings = settings
         final List<Samplesheet> parsed = []
         samplesheets.each { rawEntry ->
             try {
@@ -60,7 +63,37 @@ class WorksheetSamplesheets {
         this.samplesheets = parsed.asImmutable()
     }
 
-    void publishSamplesheets(Map<String, OutputEntry> entries, Path location, Map<String, Object> params) {
+    void publishSamplesheets(
+        Map<String, OutputEntry> entries,
+        Path location,
+        Map<String, Object> params
+    ) {
+        if (settings.splitBy) {
+            Map<String, Map<String, OutputEntry>> splitEntries = [:]
+            entries
+                .each { String key, OutputEntry entry ->
+                    String splitOption = entry.values[settings.splitBy] as String ?: 'undefined'
+                    if (!splitEntries.containsKey(splitOption)) {
+                        splitEntries[splitOption] = [:]
+                    }
+                    splitEntries[splitOption][key] = entry
+                }
+            splitEntries
+                .each { String splitOption, Map<String, OutputEntry> newEntries ->
+                    Path newLocation = location.resolve(splitOption)
+                    pushSamplesheets(newEntries, newLocation, creator, params)
+                }
+        } else {
+            pushSamplesheets(entries, location, creator, params)
+        }
+    }
+
+    private void pushSamplesheets(
+        Map<String, OutputEntry> entries,
+        Path location,
+        SamplesheetCreator creator,
+        Map<String, Object> params
+    ) {
         samplesheets.each { Samplesheet samplesheet ->
             try {
                 log.info("Publishing samplesheet '${samplesheet.name}'")

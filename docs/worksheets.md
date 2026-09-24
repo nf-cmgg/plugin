@@ -260,6 +260,14 @@ With `filter_func`, samples that fail are written to e.g. `nfcore_rnafusion_samp
 
 In `include_func` and `filter_func`, `data` exposes everything defined in `input`, `values`, `output`, and `metrics`. Additionally it also has access to all parameters using the `params` structure.
 
+## `samplesheet_settings`
+
+A map containing settings on how to generate the samplesheets.
+
+| Option     | Meaning                                                                                                                                                                                                                                                                                                |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `split_by` | A worksheet field name to split the samplesheets on. Whenever this option is used, a directory with the value of the worksheet field will be created and each samplesheet will be published in that location (only containing samplesheet entries with the same value in the specific worksheet field) |
+
 ## End-to-end example
 
 The built-in worksheet for **nf-cmgg/preprocessing** ([`nfcmgg_preprocessing.yml`](../src/main/resources/worksheets/nfcmgg_preprocessing.yml)) shows the full pattern:

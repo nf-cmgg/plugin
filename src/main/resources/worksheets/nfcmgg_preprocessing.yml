@@ -189,3 +189,5 @@ samplesheets:
         source: family_number
       cram:
       crai:
+samplesheets_settings:
+  split_by: tag
