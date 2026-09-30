@@ -1,3 +1,7 @@
+## 0.4.1
+
+1. Removed tag based include filters since that doesn't make sense anymore after splitting samplesheets per tag
+
 ## 0.4.0
 
 1. Added a new worksheet field: `samplesheets_setting`. This field can be used to change the behaviour of the samplesheet creation. Currently this field only contains one options called `split_by` which can be used to specify a field to split on (for example on analysis tag)
