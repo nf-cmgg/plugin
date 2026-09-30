@@ -104,7 +104,6 @@ samplesheets:
     include_func: |
       (data.organism?.toLowerCase() == 'homo sapiens' || data.genome?.toLowerCase() == 'grch38')
       && data.sample_type?.toLowerCase() == 'dna'
-      && data.tag?.toLowerCase() in ['wes', 'wgs']
     fields:
       sample:
       pool:
@@ -123,7 +122,6 @@ samplesheets:
     include_func: |
       (data.organism?.toLowerCase() == 'homo sapiens' || data.genome?.toLowerCase() == 'grch38')
       && data.sample_type?.toLowerCase() == 'rna'
-      && data.tag?.toLowerCase() == 'rnaseqmdg'
       && data.fastq_1 != null
     filter_func: |
       data.clusters?.toLong() >= 1000000L
@@ -164,7 +162,6 @@ samplesheets:
     include_func: |
       (data.organism?.toLowerCase() == 'homo sapiens' || data.genome?.toLowerCase() == 'grch38')
       && data.sample_type?.toLowerCase() == 'dna'
-      && data.tag?.toLowerCase() in ['wes']
     fields:
       sample:
       batch:
@@ -182,7 +179,6 @@ samplesheets:
     include_func: |
       (data.organism?.toLowerCase() == 'homo sapiens' || data.genome?.toLowerCase() == 'grch38')
       && data.sample_type?.toLowerCase() == 'dna'
-      && data.tag?.toLowerCase() in ['wes', 'wgs']
     fields:
       sample:
       family:

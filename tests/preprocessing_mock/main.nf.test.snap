@@ -176,8 +176,13 @@
                     [
                         "nfcmgg_exomecnv_samplesheet.yaml",
                         [
-                            "[",
-                            "  ]"
+                            "- sample: D123456WGS",
+                            "  batch: WGS_prep_M",
+                            "  family: Proband_123456",
+                            "  cram: D123456WGS.cram",
+                            "  crai: D123456WGS.cram.crai",
+                            "  bed: D123456WGS.per-base.bed.gz",
+                            "  bed_index: D123456WGS.per-base.bed.gz.csi"
                         ]
                     ],
                     [
@@ -232,7 +237,7 @@
                 ]
             }
         ],
-        "timestamp": "2026-09-24T14:47:18.311821057",
+        "timestamp": "2026-09-30T10:57:36.189149211",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "26.04.6"
