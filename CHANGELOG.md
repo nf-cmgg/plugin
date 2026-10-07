@@ -1,3 +1,7 @@
+## 0.4.2
+
+1. Made the `output` section of the worksheet optional. This is especially useful for pipelines that perform quality checking.
+
 ## 0.4.1
 
 1. Removed tag based include filters since that doesn't make sense anymore after splitting samplesheets per tag
