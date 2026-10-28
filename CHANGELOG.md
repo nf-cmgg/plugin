@@ -2,6 +2,7 @@
 
 1. Made the `output` section of the worksheet optional. This is especially useful for pipelines that perform quality checking.
 2. It's now possible to use all data fields in the `values` section of the worksheet. The name of the `input` object has also been changed to `data`
+3. Fixed the vivar samplesheet to use `sample` in the `id` field and to filter out mitochondrial samples based on `sample` instead of `id`
 
 ## 0.4.1
 
