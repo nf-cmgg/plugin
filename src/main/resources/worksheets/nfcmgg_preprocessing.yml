@@ -142,9 +142,10 @@ samplesheets:
         || data.genome?.toLowerCase() == 'mm10'
       )
       && data.sample_type?.toLowerCase() in ['dna', 'tissue']
-      && !data.id?.startsWith('mtD')
+      && !data.sample?.startsWith('mtD')
     fields:
       id:
+        source: sample
       organism:
       tag:
       binsize:
