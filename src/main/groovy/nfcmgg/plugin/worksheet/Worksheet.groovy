@@ -19,6 +19,8 @@ class Worksheet {
     final WorksheetMetrics metrics
     final WorksheetSamplesheets samplesheets
 
+    final Set<String> dataFields = [] as Set<String>
+
     Worksheet(Path worksheet) {
         final WorksheetErrors errors = new WorksheetErrors()
         final Map worksheetMap = loadWorksheetMap(worksheet)
@@ -28,21 +30,20 @@ class Worksheet {
         }
         name = worksheetMap.name as String
 
-        WorksheetInput parsedInput = null
         if (worksheetMap.input == null) {
             errors.error("Worksheet ${worksheet.name} is missing the required 'input' field")
         } else {
             try {
-                parsedInput = new WorksheetInput(worksheetMap.input as Map)
+                input = new WorksheetInput(worksheetMap.input as Map)
+                dataFields.addAll(input.fields.keySet())
             } catch (WorksheetException e) {
                 errors.record(e.message)
             }
         }
-        input = parsedInput
 
         if (worksheetMap.id_field == null) {
             errors.error("Worksheet ${worksheet.name} is missing the required 'id_field' field")
-        } else if (parsedInput != null && !parsedInput.hasSource(worksheetMap.id_field.toString())) {
+        } else if (input != null && !input.hasSource(worksheetMap.id_field.toString())) {
             errors.error(
                 "Worksheet ${worksheet.name} 'id_field' '${worksheetMap.id_field}' is not defined" +
                 ' as a source or key (when source is missing) in the input block'
@@ -50,66 +51,47 @@ class Worksheet {
         }
         idField = worksheetMap.id_field as String
 
-        final Set<String> inputFields = parsedInput != null ? parsedInput.fields.keySet() : ([] as Set<String>)
-        WorksheetValues parsedValues = null
-        if (worksheetMap.values != null) {
+        if (worksheetMap.output != null) {
             try {
-                parsedValues = new WorksheetValues(worksheetMap.values as Map, inputFields)
+                output = new WorksheetOutput(worksheetMap.output as Map)
+                dataFields.addAll(output.fields.keySet())
             } catch (WorksheetException e) {
                 errors.record(e.message)
             }
         }
-        values = parsedValues
 
-        WorksheetOutput parsedOutput = null
-        if (worksheetMap.output == null) {
-            errors.error("Worksheet ${worksheet.name} is missing the required 'output' field")
-        } else {
-            try {
-                parsedOutput = new WorksheetOutput(worksheetMap.output as Map)
-            } catch (WorksheetException e) {
-                errors.record(e.message)
-            }
-        }
-        output = parsedOutput
-
-        WorksheetMetrics parsedMetrics = null
         if (worksheetMap.metrics != null) {
             try {
-                parsedMetrics = new WorksheetMetrics(worksheetMap.metrics as Map)
+                metrics = new WorksheetMetrics(worksheetMap.metrics as Map)
+                dataFields.addAll(metrics.fields.keySet())
             } catch (WorksheetException e) {
                 errors.record(e.message)
             }
         }
-        metrics = parsedMetrics
 
-        WorksheetSamplesheets parsedSamplesheets = null
+        if (worksheetMap.values != null) {
+            try {
+                values = new WorksheetValues(worksheetMap.values as Map, dataFields)
+                dataFields.addAll(values.fields.keySet())
+            } catch (WorksheetException e) {
+                errors.record(e.message)
+            }
+        }
+
         if (worksheetMap.samplesheets == null) {
             errors.error("Worksheet ${worksheet.name} is missing the required 'samplesheets' field")
         } else {
-            final Set<String> dataFields = [] as Set
-            dataFields.addAll(inputFields)
-            if (parsedValues != null) {
-                dataFields.addAll(parsedValues.fields.keySet())
-            }
-            if (parsedOutput != null) {
-                dataFields.addAll(parsedOutput.fields.keySet())
-            }
-            if (parsedMetrics != null) {
-                dataFields.addAll(parsedMetrics.fields.keySet())
-            }
             try {
                 final WorksheetSamplesheetsSettings samplesheetSettings = new WorksheetSamplesheetsSettings(
                     worksheetMap.samplesheets_settings as Map, dataFields
                 )
-                parsedSamplesheets = new WorksheetSamplesheets(
+                samplesheets = new WorksheetSamplesheets(
                     worksheetMap.samplesheets as List<Map>, dataFields, samplesheetSettings
                 )
             } catch (WorksheetException e) {
                 errors.record(e.message)
             }
         }
-        samplesheets = parsedSamplesheets
 
         errors.throwIfAny("Worksheet ${worksheet.name} is invalid")
     }

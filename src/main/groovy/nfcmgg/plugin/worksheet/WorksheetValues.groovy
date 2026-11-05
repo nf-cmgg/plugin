@@ -22,7 +22,7 @@ class WorksheetValues {
      */
     final Map<String, Field> fields
 
-    WorksheetValues(Map values, Set<String> inputFields) {
+    WorksheetValues(Map values, Set<String> dataFields) {
         final WorksheetErrors errors = new WorksheetErrors()
         if (values == null || values.isEmpty()) {
             errors.error('Worksheet values is missing or empty')
@@ -32,15 +32,15 @@ class WorksheetValues {
         values.each { key, value ->
             final String fieldName = key as String
             final Map fieldMap = (value != null ? value as Map : [:]) as Map
-            parsed[fieldName] = new Field(fieldName, fieldMap, inputFields, errors)
+            parsed[fieldName] = new Field(fieldName, fieldMap, dataFields, errors)
         }
         fields = parsed.asImmutable()
         errors.throwIfAny('Invalid worksheet values')
     }
 
-    Map<String, Object> convert(Map<String, Object> inputData, Map<String, Object> params) {
-        Map<String, Object> convertedData = inputData
-        Binding inputBinding = new Binding([input: inputData, params: params])
+    Map<String, Object> convert(Map<String, Object> dataFields, Map<String, Object> params) {
+        Map<String, Object> convertedData = dataFields
+        Binding inputBinding = new Binding([data: dataFields, params: params])
         GroovyShell inputShell = SafeGroovy.shell(inputBinding)
         fields.each { key, field ->
             convertedData[key] = field.define(inputShell)
@@ -58,7 +58,7 @@ class WorksheetValues {
         final Object value
         final String func
 
-        Field(String key, Map fieldMap, Set<String> inputFields, WorksheetErrors errors) {
+        Field(String key, Map fieldMap, Set<String> dataFields, WorksheetErrors errors) {
             this.key = key
             value = fieldMap.containsKey('value') ? fieldMap.value : null
             func = fieldMap.func != null ? fieldMap.func as String : null
@@ -69,7 +69,7 @@ class WorksheetValues {
                 errors.error("Values field '${key}' cannot define both 'value' and 'func'")
             }
             if (func != null) {
-                validateFunc(key, func, inputFields, errors)
+                validateFunc(key, func, dataFields, errors)
             }
         }
 
@@ -82,7 +82,7 @@ class WorksheetValues {
             }
         }
 
-        private static void validateFunc(String key, String func, Set<String> inputFields, WorksheetErrors errors) {
+        private static void validateFunc(String key, String func, Set<String> dataFields, WorksheetErrors errors) {
             try {
                 SafeGroovy.parse(func)
             } catch (CompilationFailedException e) {
@@ -91,10 +91,10 @@ class WorksheetValues {
             final Matcher matcher = INPUT_FIELD_PATTERN.matcher(func)
             while (matcher.find()) {
                 final String referenced = matcher.group(1)
-                if (!inputFields.contains(referenced)) {
+                if (!dataFields.contains(referenced)) {
                     errors.error(
-                        "Values field '${key}' references unknown input field 'input.${referenced}'. " +
-                        "Available input fields: ${inputFields.sort().join(', ')}"
+                        "Values field '${key}' references unknown data field 'data.${referenced}'. " +
+                        "Available data fields: ${dataFields.sort().join(', ')}"
                     )
                 }
             }

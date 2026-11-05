@@ -1,3 +1,8 @@
+## 0.5.0
+
+1. Made the `output` section of the worksheet optional. This is especially useful for pipelines that perform quality checking.
+2. It's now possible to use all data fields in the `values` section of the worksheet. The name of the `input` object has also been changed to `data`
+
 ## 0.4.1
 
 1. Removed tag based include filters since that doesn't make sense anymore after splitting samplesheets per tag

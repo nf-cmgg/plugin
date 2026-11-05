@@ -77,7 +77,7 @@ samplesheets:
 
         then:
         WorksheetException e = thrown()
-        e.message.contains("unknown input field 'input.missing'")
+        e.message.contains("unknown data field 'data.missing'")
     }
 
     void 'missing output pattern aborts the plugin'() {

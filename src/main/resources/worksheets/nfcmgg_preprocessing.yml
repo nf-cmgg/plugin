@@ -39,15 +39,15 @@ values:
   strandedness:
     value: unknown
   normdup:
-    func: input.tag.toLowerCase() == "copgt-m"
+    func: data.tag.toLowerCase() == "copgt-m"
   nipt:
-    func: input.tag.toLowerCase() == "cfdnaseq"
+    func: data.tag.toLowerCase() == "cfdnaseq"
   binsize:
     func: |
-      (input.organism?.toLowerCase() == 'mus musculus' || input.genome?.toLowerCase() == 'mm10')
-      && ![100, 500].contains(input.binsize) ? 100 : input.binsize
+      (data.organism?.toLowerCase() == 'mus musculus' || data.genome?.toLowerCase() == 'mm10')
+      && ![100, 500].contains(data.binsize) ? 100 : data.binsize
   exomecnv_batch:
-    func: 'input.library + "_" + input.sex'
+    func: 'data.library + "_" + data.sex'
 # Define which output files that should be remembered for samplesheet generation.
 # Key-value pairs should be used here where the key is the name used by the plugin
 # All fields can take the following key-value pairs:
